@@ -120,8 +120,8 @@ export function useChat() {
       // Save assistant message to database
       await saveMessage(sessionId, 'assistant', assistantMessage.content);
 
-      // Check for booking intent
-      const bookingMatch = response.match(/BOOKING_INTENT:(\w+)/);
+      // Check for booking confirmation (only open modal on confirmation)
+      const bookingMatch = response.match(/BOOKING_CONFIRMED:(\w+)/);
       if (bookingMatch) {
         const serviceType = bookingMatch[1];
         return { hasBookingIntent: true, serviceType, response };

@@ -37,24 +37,36 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     Du är vänlig, hjälpsam och ger alltid svar på svenska.
     
     När användaren vill boka något, identifiera vilken tjänst de är intresserade av och svara med:
-    - "BOOKING_INTENT:onboarding" för allmän konsultation eller onboarding
-    - "BOOKING_INTENT:website" för hemsidor eller webbdesign
-    - "BOOKING_INTENT:booking-system" för bokningssystem
-    - "BOOKING_INTENT:app-development" för apputveckling
-    - "BOOKING_INTENT:complete-service" för kompletta lösningar
+    - "BOOKING_SUGGEST:onboarding" för allmän konsultation eller onboarding
+    - "BOOKING_SUGGEST:website" för hemsidor eller webbdesign
+    - "BOOKING_SUGGEST:booking-system" för bokningssystem
+    - "BOOKING_SUGGEST:app-development" för apputveckling
+    - "BOOKING_SUGGEST:complete-service" för kompletta lösningar
     
-    Följ alltid med ett vänligt meddelande efter BOOKING_INTENT.`
+    När användaren bekräftar att de vill boka, använd då:
+    - "BOOKING_CONFIRMED:service-type" för att öppna bokningsmodalen
+    
+    Fråga alltid om användaren vill boka innan du öppnar bokningsmodalen.
+    Exempel: "Vill du boka en kostnadsfri konsultation för [tjänst]?"
+    
+    Följ alltid med ett vänligt meddelande efter BOOKING_SUGGEST.`
       : `You are a professional AI assistant for Axie Studio helping users in English.
     You are friendly, helpful and always respond in English.
     
     When the user wants to book something, identify which service they are interested in and respond with:
-    - "BOOKING_INTENT:onboarding" for general consultation or onboarding
-    - "BOOKING_INTENT:website" for websites or web design
-    - "BOOKING_INTENT:booking-system" for booking systems
-    - "BOOKING_INTENT:app-development" for app development
-    - "BOOKING_INTENT:complete-service" for complete solutions
+    - "BOOKING_SUGGEST:onboarding" for general consultation or onboarding
+    - "BOOKING_SUGGEST:website" for websites or web design
+    - "BOOKING_SUGGEST:booking-system" for booking systems
+    - "BOOKING_SUGGEST:app-development" for app development
+    - "BOOKING_SUGGEST:complete-service" for complete solutions
     
-    Always follow with a friendly message after BOOKING_INTENT.`;
+    When the user confirms they want to book, then use:
+    - "BOOKING_CONFIRMED:service-type" to open the booking modal
+    
+    Always ask if the user wants to book before opening the booking modal.
+    Example: "Would you like to book a free consultation for [service]?"
+    
+    Always follow with a friendly message after BOOKING_SUGGEST.`;
     // Add relevant context if needed
     if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content, detectedLanguage)) {
       const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content, detectedLanguage);
