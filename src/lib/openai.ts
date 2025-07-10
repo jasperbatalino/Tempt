@@ -83,6 +83,12 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       }
     }
 
+    // Always include context security guidelines
+    const contextSecurity = knowledgeBase.getContextSecurity();
+    if (contextSecurity) {
+      systemPrompt += `\n\nCONTEXT SECURITY GUIDELINES:\n${contextSecurity}`;
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [

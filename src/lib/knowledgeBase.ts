@@ -18,11 +18,13 @@ class KnowledgeBase {
       // Load all knowledge files for both languages
       const [
         securitySvResponse, securityEnResponse,
+        contextSecurityResponse,
         companyInfoSvResponse, companyInfoEnResponse,
         servicesSvResponse, servicesEnResponse
       ] = await Promise.all([
         fetch('/src/data/security-sv.txt'),
         fetch('/src/data/security-en.txt'),
+        fetch('/src/data/context-security.txt'),
         fetch('/src/data/company-info-sv.txt'),
         fetch('/src/data/company-info-en.txt'),
         fetch('/src/data/company-services-sv.txt'),
@@ -31,11 +33,13 @@ class KnowledgeBase {
 
       const [
         securitySvContent, securityEnContent,
+        contextSecurityContent,
         companyInfoSvContent, companyInfoEnContent,
         servicesSvContent, servicesEnContent
       ] = await Promise.all([
         securitySvResponse.text(),
         securityEnResponse.text(),
+        contextSecurityResponse.text(),
         companyInfoSvResponse.text(),
         companyInfoEnResponse.text(),
         servicesSvResponse.text(),
@@ -68,6 +72,13 @@ class KnowledgeBase {
           content: securityEnContent,
           keywords: ['security', 'rules', 'policy', 'guidelines', 'moderation', 'hate', 'spam', 'inappropriate'],
           language: 'en'
+        },
+        // Context security (universal)
+        {
+          name: 'context-security',
+          content: contextSecurityContent,
+          keywords: ['context', 'redirect', 'off-topic', 'focus', 'business', 'axie studio', 'services'],
+          language: 'sv' // Default, but applies to both languages
         },
         {
           name: 'company-info',
@@ -185,6 +196,16 @@ class KnowledgeBase {
     }
 
     return relevantContent.trim();
+  }
+
+  getContextSecurity(): string {
+    if (!this.isLoaded) {
+      console.warn('Knowledge base not loaded yet');
+      return '';
+    }
+
+    const contextFile = this.files.find(f => f.name === 'context-security');
+    return contextFile ? contextFile.content : '';
   }
 
   // Security check for inappropriate content
