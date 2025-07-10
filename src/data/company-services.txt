@@ -1,0 +1,94 @@
+AXIE STUDIO - TJÄNSTER OCH LÖSNINGAR
+
+=== ONBOARDING & KONSULTATION ===
+Kostnadsfri första konsultation där vi:
+- Analyserar dina affärsbehov
+- Identifierar digitala möjligheter
+- Skapar en skräddarsydd strategi
+- Presenterar lämpliga lösningar
+- Ger transparent prisuppskattning
+
+Perfekt för: Nya kunder, företag som planerar digital transformation
+
+=== HEMSIDOR & WEBBDESIGN ===
+Professionella webbsidor som konverterar besökare till kunder:
+- Responsiv design för alla enheter
+- SEO-optimerad för bättre synlighet
+- Snabb laddningstid och prestanda
+- Användarvänligt innehållshanteringssystem
+- Integrationer med sociala medier
+- Analytics och spårning
+- Säkerhetsuppdateringar och underhåll
+
+Teknologier: React, WordPress, Shopify, Webflow
+Leveranstid: 2-6 veckor beroende på komplexitet
+Pris: Från 15,000 SEK
+
+=== BOKNINGSSYSTEM ===
+Automatiserade bokningslösningar som sparar tid:
+- Online-bokning 24/7
+- Automatiska påminnelser
+- Betalningsintegration
+- Kalendersynkronisering
+- Kundhantering
+- Rapporter och analytics
+- Mobilapp (tillval)
+
+Perfekt för: Frisörer, läkare, konsulter, restauranger, eventföretag
+Leveranstid: 3-8 veckor
+Pris: Från 25,000 SEK
+
+=== APPUTVECKLING ===
+Skräddarsydda mobilappar och webbappar:
+- iOS och Android utveckling
+- Progressive Web Apps (PWA)
+- Cross-platform lösningar
+- Backend och API utveckling
+- Databasdesign
+- Push-notifikationer
+- App Store optimering
+- Underhåll och uppdateringar
+
+Teknologier: React Native, Flutter, Swift, Kotlin
+Leveranstid: 8-16 veckor
+Pris: Från 75,000 SEK
+
+=== KOMPLETT DIGITAL TRANSFORMATION ===
+Heltäckande digitala lösningar för företag:
+- Hemsida + E-handel
+- Bokningssystem + CRM
+- Mobilapp + Admin-panel
+- Automatisering och integrationer
+- Digital marknadsföring
+- SEO och innehållsstrategi
+- Utbildning och support
+- Löpande utveckling och optimering
+
+Perfekt för: Växande företag, etablerade företag som vill digitalisera
+Leveranstid: 12-24 veckor
+Pris: Från 150,000 SEK
+
+=== TILLÄGGSSERVICE ===
+- Domän och hosting
+- SSL-certifikat
+- E-postlösningar
+- Backup och säkerhet
+- Prestationsoptimering
+- Teknisk support
+- Utbildning för personal
+- Digital marknadsföring
+
+=== PRISSÄTTNING ===
+- Transparent prissättning utan dolda kostnader
+- Flexibla betalningsplaner
+- Kostnadsfria uppdateringar första året
+- 30 dagars pengarna-tillbaka-garanti
+- Rabatter för långsiktiga avtal
+
+=== PROCESS ===
+1. Kostnadsfri konsultation
+2. Projektplanering och offert
+3. Design och utveckling
+4. Testning och kvalitetssäkring
+5. Lansering och utbildning
+6. Löpande support och underhåll
