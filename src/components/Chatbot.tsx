@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Calendar, X, MessageCircle, Loader2 } from 'lucide-react';
+import { Send, Bot, User, MessageCircle, Loader2 } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
+import BookingModal from './BookingModal';
 
 const Chatbot = () => {
   const { messages, isLoading, sendMessage } = useChat();
   const [input, setInput] = useState('');
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [calendarUrl] = useState('https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ0QR3uRxVB7rb4ZHqJ1qYmz-T0e2CFtV5MYekvGDq1qyWxsV_Av3nP3zEGk0DrH2HqpTLoXuK0h');
+  const [showBooking, setShowBooking] = useState(false);
+  const [detectedService, setDetectedService] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -28,9 +29,10 @@ const Chatbot = () => {
     try {
       const result = await sendMessage(messageContent);
       
-      if (result?.hasBookingIntent) {
+      if (result?.hasBookingIntent && result?.serviceType) {
+        setDetectedService(result.serviceType);
         setTimeout(() => {
-          setShowCalendar(true);
+          setShowBooking(true);
         }, 500);
       }
     } catch (error) {
@@ -43,7 +45,8 @@ const Chatbot = () => {
   }, []);
 
   const closeCalendar = useCallback(() => {
-    setShowCalendar(false);
+    setShowBooking(false);
+    setDetectedService('');
   }, []);
 
   return (
@@ -156,43 +159,12 @@ const Chatbot = () => {
         </form>
       </div>
 
-      {/* Calendar Modal */}
-      {showCalendar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">Boka Din Tid</h2>
-                  <p className="text-sm text-gray-500">Välj en tid som passar dig</p>
-                </div>
-              </div>
-              <button
-                onClick={closeCalendar}
-                className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="bg-gray-50 rounded-xl overflow-hidden" style={{ height: '600px' }}>
-                <iframe
-                  src={calendarUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  title="Bokningskalender"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Booking Modal */}
+      <BookingModal 
+        isOpen={showBooking}
+        onClose={closeCalendar}
+        detectedService={detectedService}
+      />
     </div>
   );
 };

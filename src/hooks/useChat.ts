@@ -121,8 +121,10 @@ export function useChat() {
       await saveMessage(sessionId, 'assistant', assistantMessage.content);
 
       // Check for booking intent
-      if (response.includes('BOOKING_INTENT')) {
-        return { hasBookingIntent: true, response };
+      const bookingMatch = response.match(/BOOKING_INTENT:(\w+)/);
+      if (bookingMatch) {
+        const serviceType = bookingMatch[1];
+        return { hasBookingIntent: true, serviceType, response };
       }
 
       return { hasBookingIntent: false, response };

@@ -17,9 +17,17 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       messages: [
         {
           role: 'system',
-          content: `Du är en professionell AI-assistent som hjälper användare på svenska. 
-          Du är vänlig, hjälpsam och ger alltid svar på svenska. 
-          Om användaren vill boka något, svara med "BOOKING_INTENT" i början av ditt svar.`
+          content: `Du är en professionell AI-assistent för Axie Studio som hjälper användare på svenska. 
+          Du är vänlig, hjälpsam och ger alltid svar på svenska.
+          
+          När användaren vill boka något, identifiera vilken tjänst de är intresserade av och svara med:
+          - "BOOKING_INTENT:onboarding" för allmän konsultation eller onboarding
+          - "BOOKING_INTENT:website" för hemsidor eller webbdesign
+          - "BOOKING_INTENT:booking-system" för bokningssystem
+          - "BOOKING_INTENT:app-development" för apputveckling
+          - "BOOKING_INTENT:complete-service" för kompletta lösningar
+          
+          Följ alltid med ett vänligt meddelande efter BOOKING_INTENT.`
         },
         ...messages
       ],
