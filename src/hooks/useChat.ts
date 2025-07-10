@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase, createChatSession, saveMessage, loadChatHistory, updateSessionTitle } from '../lib/supabase';
 import { generateResponse, ChatMessage } from '../lib/openai';
+import { leadCaptureService } from '../lib/leadCapture';
 
 export interface Message {
   id: string;
@@ -73,6 +74,49 @@ export function useChat() {
 
       // Save user message to database
       await saveMessage(sessionId, 'user', userMessage.content);
+
+      // Check for lead capture before generating AI response
+      const leadResult = await leadCaptureService.processMessage(
+        userMessage.content,
+        'sv', // You can make this dynamic based on detected language
+        sessionId
+      );
+
+      // If lead was captured, show confirmation message
+      if (leadResult.leadCaptured && leadResult.response) {
+        // Remove thinking message and add lead confirmation
+        setMessages(prev => prev.filter(msg => !msg.isLoading));
+        
+        const leadConfirmationMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: leadResult.response,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, leadConfirmationMessage]);
+        await saveMessage(sessionId, 'assistant', leadConfirmationMessage.content);
+        
+        return { hasBookingIntent: false, response: leadResult.response };
+      }
+
+      // If user wants contact but didn't provide info, ask for it
+      if (leadResult.hasContactIntent && !leadResult.leadCaptured && leadResult.response) {
+        // Remove thinking message and add request for contact info
+        setMessages(prev => prev.filter(msg => !msg.isLoading));
+        
+        const contactRequestMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: leadResult.response,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, contactRequestMessage]);
+        await saveMessage(sessionId, 'assistant', contactRequestMessage.content);
+        
+        return { hasBookingIntent: false, response: leadResult.response };
+      }
 
       // Update session title if this is the first user message
       const isFirstUserMessage = messages.filter(m => m.role === 'user').length === 0;
