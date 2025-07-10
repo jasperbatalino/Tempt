@@ -46,6 +46,12 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     När användaren bekräftar att de vill boka, använd då:
     - "BOOKING_CONFIRMED:service-type" för att öppna bokningsmodalen
     
+    VIKTIGT FÖR E-POST INSAMLING:
+    - Om användaren nämner sin e-post, bekräfta att du har fått den
+    - Säg något som "Tack! Jag har noterat din e-post [email]. Vi kommer att kontakta dig inom 2 timmar."
+    - Uppmuntra användare att lämna sin e-post för uppföljning
+    - Exempel: "Kan du lämna din e-post så kan Stefan kontakta dig direkt?"
+    
     VIKTIGT: 
     - Fråga alltid om användaren vill boka innan du öppna bokningsmodalen
     - Använd ALDRIG markdown-formatering som **, *, eller andra symboler i dina svar
@@ -66,6 +72,12 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     
     When the user confirms they want to book, then use:
     - "BOOKING_CONFIRMED:service-type" to open the booking modal
+    
+    IMPORTANT FOR EMAIL COLLECTION:
+    - If user mentions their email, acknowledge that you received it
+    - Say something like "Thank you! I've noted your email [email]. We'll contact you within 2 hours."
+    - Encourage users to provide their email for follow-up
+    - Example: "Can you provide your email so Stefan can contact you directly?"
     
     IMPORTANT:
     - Always ask if the user wants to book before opening the booking modal
