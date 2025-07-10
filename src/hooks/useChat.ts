@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { supabase, createChatSession, saveMessage, loadChatHistory, updateSessionTitle, captureEmailLead } from '../lib/supabase';
+import { supabase, createChatSession, saveMessage, loadChatHistory, updateSessionTitle } from '../lib/supabase';
 import { generateResponse, ChatMessage } from '../lib/openai';
 
 export interface Message {
@@ -104,28 +104,6 @@ export function useChat() {
 
       // Generate response
       const response = await generateResponse(chatMessages);
-      
-      // Check for email in user message and capture it
-      const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-      const emailMatch = content.match(emailRegex);
-      
-      if (emailMatch && emailMatch.length > 0) {
-        const email = emailMatch[0];
-        try {
-          const result = await captureEmailLead(
-            email,
-            sessionId,
-            `User provided email during conversation: "${content.substring(0, 100)}..."`,
-            'chat'
-          );
-          
-          if (result.success && result.isNew) {
-            console.log('✅ New email lead captured:', email);
-          }
-        } catch (error) {
-          console.error('Error capturing email lead:', error);
-        }
-      }
       
       // Remove thinking message and add real response
       setMessages(prev => prev.filter(msg => !msg.isLoading));

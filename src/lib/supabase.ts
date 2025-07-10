@@ -63,38 +63,6 @@ export type Database = {
         };
       };
     };
-    email_leads: {
-      Row: {
-        id: string;
-        email: string;
-        source: string;
-        context: string | null;
-        session_id: string | null;
-        status: 'new' | 'contacted' | 'converted' | 'unqualified';
-        created_at: string;
-        updated_at: string;
-      };
-      Insert: {
-        id?: string;
-        email: string;
-        source?: string;
-        context?: string | null;
-        session_id?: string | null;
-        status?: 'new' | 'contacted' | 'converted' | 'unqualified';
-        created_at?: string;
-        updated_at?: string;
-      };
-      Update: {
-        id?: string;
-        email?: string;
-        source?: string;
-        context?: string | null;
-        session_id?: string | null;
-        status?: 'new' | 'contacted' | 'converted' | 'unqualified';
-        created_at?: string;
-        updated_at?: string;
-      };
-    };
   };
 };
 
@@ -141,64 +109,6 @@ export async function updateSessionTitle(sessionId: string, title: string) {
     .from('chat_sessions')
     .update({ title })
     .eq('id', sessionId);
-
-  if (error) throw error;
-}
-
-// Email lead capture functions
-export async function captureEmailLead(
-  email: string, 
-  sessionId: string | null = null, 
-  context: string | null = null,
-  source: string = 'chat'
-) {
-  try {
-    const { data, error } = await supabase
-      .from('email_leads')
-      .upsert({
-        email: email.toLowerCase().trim(),
-        session_id: sessionId,
-        context,
-        source
-      }, {
-        onConflict: 'email',
-        ignoreDuplicates: false
-      })
-      .select()
-      .single();
-
-    if (error) {
-      // If it's a duplicate email, that's okay - we still captured it
-      if (error.code === '23505') {
-        console.log('Email already exists in leads:', email);
-        return { success: true, isNew: false, email };
-      }
-      throw error;
-    }
-
-    return { success: true, isNew: true, data };
-  } catch (error) {
-    console.error('Error capturing email lead:', error);
-    return { success: false, error };
-  }
-}
-
-export async function getEmailLeads(limit: number = 50) {
-  const { data, error } = await supabase
-    .from('email_leads')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateLeadStatus(id: string, status: 'new' | 'contacted' | 'converted' | 'unqualified') {
-  const { error } = await supabase
-    .from('email_leads')
-    .update({ status })
-    .eq('id', id);
 
   if (error) throw error;
 }
