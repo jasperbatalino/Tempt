@@ -139,7 +139,11 @@ const Chatbot = () => {
                   </div>
                 )}
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {msg.content.replace('BOOKING_INTENT', '').trim() || msg.content}
+                  {msg.content
+                    .replace(/BOOKING_CONFIRMED:\w+/g, '')
+                    .replace(/BOOKING_SUGGEST:\w+/g, '')
+                    .replace('BOOKING_INTENT', '')
+                    .trim() || msg.content}
                 </p>
               </div>
               <p className={`text-xs mt-1 ${
