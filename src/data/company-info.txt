@@ -1,42 +1,83 @@
 AXIE STUDIO - FÖRETAGSINFORMATION
 
 === OM AXIE STUDIO ===
-Axie Studio är ett innovativt digitalt byrå som specialiserar sig på att skapa skräddarsydda digitala lösningar för företag av alla storlekar. Vi kombinerar kreativitet med teknisk expertis för att leverera resultat som överträffar förväntningar.
+Axie Studio är #1 i branschen för digitala lösningar. Vi skapar inte bara digitala lösningar - vi bygger relationer och levererar resultat som driver ditt företag framåt med hjärta och passion.
+
+Vår motto: "Build, Book, Automate: Your Digital Success, Simplified."
+
+Vi hjälper företag att digitalisera och automatisera sina processer med moderna webbplatser, bokningssystem och e-handelslösningar som driver verklig tillväxt.
 
 === VÅR MISSION ===
-Att hjälpa företag att växa och lyckas i den digitala världen genom innovativa, användarvänliga och effektiva digitala lösningar.
-
-=== VÅR VISION ===
-Att vara den ledande digitala partnern för företag som vill transformera sin verksamhet och nå nya höjder online.
+Att leverera precision, kvalitet och resultat — varje gång. Vi skapar inte bara digitala lösningar - vi bygger relationer som driver ditt företag framåt.
 
 === VÅRA VÄRDERINGAR ===
-- Innovation: Vi strävar alltid efter de senaste teknologierna och metoderna
-- Kvalitet: Vi levererar endast högkvalitativa lösningar
-- Kundnöjdhet: Våra kunders framgång är vår framgång
-- Transparens: Öppen kommunikation och ärliga råd
-- Tillförlitlighet: Vi håller våra löften och levererar i tid
-
-=== VÅRT TEAM ===
-Vårt team består av erfarna utvecklare, designers, projektledare och digitala strateger som brinner för att skapa exceptionella digitala upplevelser.
+- 99.9% Drifttid: Pålitliga lösningar som alltid fungerar - din framgång är vår prioritet
+- Personlig Service: Vi bryr oss om dig och ditt företag - alltid här när du behöver oss
+- Digital Excellence: Levererar precision, kvalitet och resultat — varje gång
+- Betrodd av Många: Våra kunder litar på oss för kritiska affärslösningar
 
 === KONTAKTINFORMATION ===
-- Huvudkontor: Stockholm, Sverige
-- Arbetstider: Måndag-Fredag 09:00-17:00
-- Support: Tillgänglig via chat, e-post och telefon
-- Konsultationer: Kostnadsfria första konsultationer
+Huvudkontor: Jönköping, Sverige
 
-=== BRANSCHEXPERTIS ===
-Vi har erfarenhet inom:
-- E-handel och retail
-- Hälso- och sjukvård
-- Utbildning och e-learning
-- Fintech och finansiella tjänster
-- Fastigheter och mäkleri
-- Restaurang och hospitality
-- Teknologi och SaaS
+E-post:
+- Allmänna frågor: stefan@axiestudio.se
+- Support & hjälp: support@axiestudio.se
+- Vi svarar inom 2 timmar
 
-=== CERTIFIERINGAR ===
-- Google Partner
-- Microsoft Certified
-- AWS Solutions Provider
-- ISO 27001 säkerhetsstandarder
+Telefon:
+- Sverige: +46 735 132 620
+- Filippinerna: +63 962 576 1387
+- Vardagar 9-17
+
+Träffas:
+- Fysiskt: Jönköping, Sverige
+- Virtuellt: Via video
+- Kostnadsfri konsultation över kaffe ☕
+
+=== KOSTNADSFRI KONSULTATION ===
+Vi erbjuder alltid en kostnadsfri första konsultation där vi lär känna dig, ditt företag och dina drömmar. Inga säljpitchar - bara äkta samtal om hur vi kan hjälpa dig.
+
+- 30-60 minuter
+- Helt kostnadsfritt
+- Avslappnad atmosfär
+- Kostnadsfri konsultation ingår alltid
+
+=== VÅRA GARANTIER ===
+- Inga bindningstider - Avsluta när som helst
+- 24/7 Support
+- Snabb leverans
+- 99.9% Drifttid
+- Kostnadsfri konsultation
+- Regelbundna uppdateringar
+
+=== LEVERANSTID ===
+- Genomsnittlig leveranstid för en komplett webbplats: 14 dagar
+- Snabb time-to-market för alla projekt
+- Komplett projekthantering från start till mål
+
+=== SPECIALOMRÅDEN ===
+Perfekt för alla branscher:
+- Hälsovård
+- Skönhet & Wellness  
+- Konsulttjänster
+- Restauranger
+- Fitness
+- Utbildning
+- Frisörer, läkare, konsulter, restauranger, fitnesscenter, och många fler
+
+=== TEKNISK EXPERTIS ===
+- SSL-kryptering och säkerhetsuppdateringar som standard
+- Fullständig GDPR-compliance
+- SEO-optimerad för bättre synlighet i sökmotorer
+- Responsiv design som fungerar på alla enheter
+- Blixtsnabb laddning och optimerad prestanda
+- Cross-platform utveckling (iOS, Android, Desktop)
+- App Store Distribution (Google Play Store och Apple App Store)
+
+=== SUPPORT & SERVICE ===
+- 24/7 Support
+- Kontinuerlig support och underhåll
+- Skalbar arkitektur som växer med ditt företag
+- Prioriterad support för premium-kunder
+- Vi svarar inom 2 timmar
+- Personlig service - vi bryr oss om dig och ditt företag

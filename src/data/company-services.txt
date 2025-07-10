@@ -1,94 +1,169 @@
 AXIE STUDIO - TJÄNSTER OCH LÖSNINGAR
 
-=== ONBOARDING & KONSULTATION ===
-Kostnadsfri första konsultation där vi:
-- Analyserar dina affärsbehov
-- Identifierar digitala möjligheter
-- Skapar en skräddarsydd strategi
-- Presenterar lämpliga lösningar
-- Ger transparent prisuppskattning
+=== KOSTNADSFRI KONSULTATION ===
+Vi erbjuder alltid en kostnadsfri första konsultation där vi:
+- Lär känna dig, ditt företag och dina drömmar
+- Inga säljpitchar - bara äkta samtal
+- 30-60 minuter helt kostnadsfritt
+- Avslappnad atmosfär
+- Hjälper dig hitta den perfekta lösningen
 
-Perfekt för: Nya kunder, företag som planerar digital transformation
+=== 1. WEBBPLATS PAKET ===
+Professionell webbplats som konverterar besökare till kunder
 
-=== HEMSIDOR & WEBBDESIGN ===
-Professionella webbsidor som konverterar besökare till kunder:
-- Responsiv design för alla enheter
-- SEO-optimerad för bättre synlighet
-- Snabb laddningstid och prestanda
-- Användarvänligt innehållshanteringssystem
-- Integrationer med sociala medier
-- Analytics och spårning
-- Säkerhetsuppdateringar och underhåll
+PRIS: 8,995 kr startavgift + 495 kr/månad
+💡 Inga bindningstider • Avsluta när som helst
 
-Teknologier: React, WordPress, Shopify, Webflow
-Leveranstid: 2-6 veckor beroende på komplexitet
-Pris: Från 15,000 SEK
+VAD INGÅR:
+- Skräddarsydd design unik för ditt varumärke
+- Responsiv webbdesign (fungerar på alla enheter)
+- Blixtsnabb laddning och optimerad prestanda
+- SEO-optimering för bättre synlighet
+- Kontaktformulär
+- Sociala medier-integration
+- Google Analytics
+- SSL-certifikat och säkerhet
+- Domännamn ingår i priset
+- 24/7 Support
 
-=== BOKNINGSSYSTEM ===
-Automatiserade bokningslösningar som sparar tid:
-- Online-bokning 24/7
-- Automatiska påminnelser
-- Betalningsintegration
+LEVERANSTID: 14 dagar genomsnittlig leveranstid
+PERFEKT FÖR: Företag som vill ha professionell närvaro online
+
+=== 2. COMMERCE PAKET (E-HANDEL) ===
+Komplett e-handelslösning med webshop och betalningar
+
+PRIS: 10,995 kr startavgift + 895 kr/månad
+💡 Inga bindningstider • Avsluta när som helst
+
+VAD INGÅR:
+- Allt i Webbplats-paketet
+- Komplett webshop med kundvagn och checkout
+- Produkthantering (enkelt att lägga till/redigera produkter)
+- Säkra betalningar (Stripe, Klarna, Swish)
+- Orderhantering och automatisk orderbehandling
+- Kundkonton med orderhistorik och favoriter
+- Automatisk lagerhantering och notifieringar
+- Rabattkoder och kampanjverktyg
+- Leveransalternativ med automatisk prisberäkning
+- Försäljningsanalys och detaljerade rapporter
+- GDPR-compliance och säkra transaktioner
+
+MARKNADSFÖRINGSVERKTYG:
+- CRM & Kundhantering med segmentering
+- Automatiserad marknadsföring (e-post och SMS)
+- Lead Generation verktyg
+- Avancerad Analytics och kundreseinsikter
+- Integrerad marknadsföringsautomatisering
+
+PERFEKT FÖR: Företag som vill sälja produkter online
+
+=== 3. BOKNINGSSYSTEM PAKET ⭐ MEST POPULÄR ===
+Avancerat bokningssystem med automatisering och CRM
+
+PRIS: 10,995 kr startavgift + 995 kr/månad
+💡 Inga bindningstider • Avsluta när som helst
+
+VAD INGÅR:
+- Allt i Webbplats-paketet
+- Intelligent schemaläggning med konfliktdetektering
+- Realtidsbokning med omedelbar bekräftelse
+- Automatisk hantering av tider, resurser och personal
+- Komplett CRM med kundhistorik och preferenser
+- Betalningsintegration (Stripe, Swish, andra metoder)
+- Automatiska påminnelser (SMS och e-post)
 - Kalendersynkronisering
-- Kundhantering
-- Rapporter och analytics
-- Mobilapp (tillval)
+- SMS-notifieringar
+- Analys & rapporter (bokningar, intäkter, kundtrender)
+- Automatisk kommunikation med kunder
 
-Perfekt för: Frisörer, läkare, konsulter, restauranger, eventföretag
-Leveranstid: 3-8 veckor
-Pris: Från 25,000 SEK
+FÖRDELAR:
+- Minskar no-shows med upp till 80%
+- Automatiserar hela bokningsprocessen
+- Från första kontakt till slutförd tjänst
+- Perfekt för alla branscher
 
-=== APPUTVECKLING ===
-Skräddarsydda mobilappar och webbappar:
-- iOS och Android utveckling
-- Progressive Web Apps (PWA)
-- Cross-platform lösningar
-- Backend och API utveckling
-- Databasdesign
-- Push-notifikationer
-- App Store optimering
-- Underhåll och uppdateringar
+PERFEKT FÖR: Frisörer, läkare, konsulter, restauranger, fitnesscenter, hälsovård, skönhet & wellness, utbildning
 
-Teknologier: React Native, Flutter, Swift, Kotlin
-Leveranstid: 8-16 veckor
-Pris: Från 75,000 SEK
+=== 4. KOMPLETT PAKET (MEST VÄRDE) ===
+Allt-i-ett lösning med app, webshop och bokningssystem
 
-=== KOMPLETT DIGITAL TRANSFORMATION ===
-Heltäckande digitala lösningar för företag:
-- Hemsida + E-handel
-- Bokningssystem + CRM
-- Mobilapp + Admin-panel
-- Automatisering och integrationer
-- Digital marknadsföring
-- SEO och innehållsstrategi
-- Utbildning och support
-- Löpande utveckling och optimering
+PRIS: 14,995 kr startavgift + 1,495 kr/månad
+💡 Inga bindningstider • Avsluta när som helst
 
-Perfekt för: Växande företag, etablerade företag som vill digitalisera
-Leveranstid: 12-24 veckor
-Pris: Från 150,000 SEK
+VAD INGÅR:
+- Allt i tidigare paket
+- Dedikerad mobilapp (iOS och Android)
+- Cross-platform utveckling (en kodbas för alla plattformar)
+- App Store publicering* (Google Play Store och Apple App Store)
+- Native app-känsla med smooth animationer
+- Push-notifieringar (smarta och relevanta)
+- Blixtsnabb prestanda med avancerad caching
+- Prioriterad support 24/7
+- Obegränsade bokningar
+- Automatiserad marknadsföring
+- Avancerad CRM & Analytics
+- White-label lösning
+- Automatiska uppdateringar
+- Lägre utvecklingskostnader
+- Snabbare time-to-market
 
-=== TILLÄGGSSERVICE ===
-- Domän och hosting
-- SSL-certifikat
-- E-postlösningar
-- Backup och säkerhet
-- Prestationsoptimering
-- Teknisk support
-- Utbildning för personal
-- Digital marknadsföring
+*App Store publicering: För Apple och Google Store publicering tillkommer extra kostnad
 
-=== PRISSÄTTNING ===
-- Transparent prissättning utan dolda kostnader
-- Flexibla betalningsplaner
-- Kostnadsfria uppdateringar första året
-- 30 dagars pengarna-tillbaka-garanti
-- Rabatter för långsiktiga avtal
+PERFEKT FÖR: Företag som vill ha komplett digital närvaro
 
-=== PROCESS ===
-1. Kostnadsfri konsultation
-2. Projektplanering och offert
-3. Design och utveckling
-4. Testning och kvalitetssäkring
-5. Lansering och utbildning
-6. Löpande support och underhåll
+=== MOBILAPPAR (SEPARAT TJÄNST) ===
+Moderna mobilappar för iOS och Android
+
+FUNKTIONER:
+- Cross-platform utveckling
+- Blixtsnabb prestanda
+- Push-notifieringar
+- App Store distribution
+- Native app-känsla
+- Säker & pålitlig
+- Fullständig App Store-optimering
+
+PROCESS:
+- Från app-idé till App Store
+- En kodbas för alla plattformar
+- Automatiska uppdateringar
+- Publiceras i både Google Play Store och Apple App Store
+
+=== ALLMÄNNA FÖRDELAR ===
+- Kostnadsfri konsultation ingår alltid
+- Inga bindningstider
+- 24/7 Support
+- Snabb leverans
+- 99.9% Drifttid
+- Regelbundna uppdateringar
+- Personlig service
+- Alla priser är exklusive moms
+- Domännamn ingår i priset
+- Komplett projekthantering från start till mål
+- Kontinuerlig support och underhåll
+- Skalbar arkitektur som växer med ditt företag
+
+=== VANLIGA FRÅGOR ===
+Q: Vad kostar en webbplats från Axie Studio?
+A: Våra webbplatser börjar från 8,995 kr i startavgift plus 495 kr per månad.
+
+Q: Hur lång tid tar det att utveckla en webbplats?
+A: Genomsnittlig leveranstid är 14 dagar för en komplett webbplats.
+
+Q: Ingår SEO-optimering?
+A: Ja, alla våra webbplatser är SEO-optimerade som standard.
+
+Q: Kan ni hjälpa med e-handel?
+A: Ja, vi erbjuder kompletta e-handelslösningar från 10,995 kr.
+
+Q: Vad ingår i den månatliga avgiften?
+A: Hosting, support, uppdateringar, säkerhet och teknisk drift.
+
+Q: Kan jag avsluta när som helst?
+A: Ja, inga bindningstider - avsluta när som helst.
+
+=== KONTAKT FÖR BOKNING ===
+- Boka kostnadsfri konsultation
+- E-post: stefan@axiestudio.se
+- Telefon: +46 735 132 620
+- Support: support@axiestudio.se
