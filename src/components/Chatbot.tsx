@@ -14,7 +14,7 @@ const Chatbot = () => {
     {
       id: '1',
       sender: 'bot',
-      text: "Hello! I'm your AI assistant. How can I help you today?",
+      text: "Hej! Jag är din AI-assistent. Hur kan jag hjälpa dig idag?",
       timestamp: new Date()
     }
   ]);
@@ -53,7 +53,7 @@ const Chatbot = () => {
     const thinkingMsg: Message = {
       id: (Date.now() + 0.5).toString(),
       sender: 'bot',
-      text: 'Thinking...',
+      text: 'Tänker...',
       timestamp: new Date(),
       isLoading: true
     };
@@ -78,7 +78,7 @@ const Chatbot = () => {
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: data.reply || "I understand you'd like to book something. Let me open the calendar for you.",
+        text: data.reply || "Jag förstår att du vill boka något. Låt mig öppna kalendern för dig.",
         timestamp: new Date()
       };
       
@@ -97,7 +97,7 @@ const Chatbot = () => {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: "I'm having trouble connecting right now. Please try again in a moment.",
+        text: "Jag har problem med anslutningen just nu. Försök igen om ett ögonblick.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -131,8 +131,8 @@ const Chatbot = () => {
             <MessageCircle className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">AI Assistant</h1>
-            <p className="text-sm text-gray-500">Always here to help</p>
+            <h1 className="text-xl font-semibold text-gray-900">AI-Assistent</h1>
+            <p className="text-sm text-gray-500">Alltid här för att hjälpa</p>
           </div>
         </div>
       </div>
@@ -194,7 +194,7 @@ const Chatbot = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Skriv ditt meddelande..."
               className={`w-full px-4 py-3 pr-12 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
                 isSending 
                   ? 'bg-gray-100 border border-gray-300 text-gray-500' 
@@ -237,8 +237,8 @@ const Chatbot = () => {
                   <Calendar className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">Book Your Appointment</h2>
-                  <p className="text-sm text-gray-500">Choose a time that works for you</p>
+                  <h2 className="text-xl font-semibold text-gray-900">Boka Din Tid</h2>
+                  <p className="text-sm text-gray-500">Välj en tid som passar dig</p>
                 </div>
               </div>
               <button
@@ -258,7 +258,7 @@ const Chatbot = () => {
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
-                  title="Booking Calendar"
+                  title="Bokningskalender"
                   loading="lazy"
                 />
               </div>
