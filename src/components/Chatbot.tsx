@@ -70,7 +70,14 @@ const Chatbot = () => {
         }
       );
 
-      const data = await res.json();
+      const responseText = await res.text();
+      console.log('Raw response:', responseText); // Debug log
+      
+      // Clean up the response and parse JSON
+      const cleanedResponse = responseText.replace(/\\n/g, '').replace(/\\/g, '');
+      const data = JSON.parse(cleanedResponse);
+      
+      console.log('Parsed data:', data); // Debug log
       
       // Replace thinking message with actual response
       setMessages(prev => prev.filter(msg => !msg.isLoading));
