@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, MessageCircle, Loader2 } from 'lucide-react';
+import { Send, User, Loader2 } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import BookingModal from './BookingModal';
 
@@ -54,12 +54,16 @@ const Chatbot = () => {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white border-2 border-gray-200">
+            <img 
+              src="/public/image.png" 
+              alt="Axie Studio AI" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">AI-Assistent</h1>
-            <p className="text-sm text-gray-500">Powered by OpenAI & Supabase</p>
+            <h1 className="text-xl font-bold text-gray-900">Axie</h1>
+            <p className="text-sm text-gray-500">Axie Studios AI</p>
           </div>
         </div>
       </div>
@@ -77,12 +81,16 @@ const Chatbot = () => {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
               msg.role === 'user' 
                 ? 'bg-gradient-to-r from-green-400 to-blue-500' 
-                : 'bg-gradient-to-r from-purple-400 to-pink-500'
+                : 'bg-white border-2 border-gray-200 overflow-hidden'
             }`}>
               {msg.role === 'user' ? (
                 <User className="w-4 h-4 text-white" />
               ) : (
-                <Bot className="w-4 h-4 text-white" />
+                <img 
+                  src="/public/image.png" 
+                  alt="Axie" 
+                  className="w-full h-full object-cover"
+                />
               )}
             </div>
 

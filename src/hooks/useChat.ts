@@ -29,7 +29,7 @@ export function useChat() {
         const welcomeMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
-          content: 'Hej! Jag är din AI-assistent. Hur kan jag hjälpa dig idag?',
+          content: 'Hej! Jag är Axie, din AI-assistent från Axie Studio. Hur kan jag hjälpa dig idag?',
           timestamp: new Date()
         };
 
