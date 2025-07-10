@@ -23,7 +23,7 @@ export type Database = {
         Insert: {
           id?: string;
           user_id?: string | null;
-          title: string;
+          title?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -61,3 +61,50 @@ export type Database = {
     };
   };
 };
+
+// Helper functions for chat operations
+export async function createChatSession(title?: string) {
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .insert({ title: title || 'Ny Konversation' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function saveMessage(sessionId: string, role: 'user' | 'assistant', content: string) {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      session_id: sessionId,
+      role,
+      content
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function loadChatHistory(sessionId: string) {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateSessionTitle(sessionId: string, title: string) {
+  const { error } = await supabase
+    .from('chat_sessions')
+    .update({ title })
+    .eq('id', sessionId);
+
+  if (error) throw error;
+}
