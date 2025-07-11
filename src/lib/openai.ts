@@ -73,6 +73,8 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - When using BOOKING_CONFIRMED, do NOT include this text in the visible response to the user
     - Always provide clean, professional responses without formatting
     - Example: "Would you like to book a free consultation for [service]?"
+    - DO NOT say you cannot contact users directly - the lead capture system handles this automatically
+    - Focus on providing helpful information about Axie Studio services
     
     Always follow with a friendly message after BOOKING_SUGGEST.`;
     // Add relevant context if needed

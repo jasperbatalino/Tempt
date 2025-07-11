@@ -74,7 +74,11 @@ class LeadCaptureService {
       'quote', 'pricing', 'more information', 'want to know more',
       'can you contact', 'contact me through', 'my email is', 'email is',
       'here is my email', 'you can reach me', 'contact me at', 'reach me at',
-      'send me', 'email me at', 'my contact', 'get back to me at'
+      'send me', 'email me at', 'my contact', 'get back to me at',
+      'contact me later', 'reach me later', 'get back to me later',
+      'contact me at', 'reach out at', 'email me later', 'call me at',
+      'you can contact me', 'you can reach me', 'you can email me',
+      'contact me on', 'reach me on', 'get in touch at'
     ];
 
     const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
