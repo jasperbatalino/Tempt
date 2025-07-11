@@ -77,8 +77,8 @@ export function useChat() {
   const sendMessage = useCallback(async (content: string) => {
     if (isLoading || !content.trim() || !sessionId) return;
 
-    // Detect language first
-    const detectedLanguage = content.includes('hej') || content.includes('tack') || content.includes('och') ? 'sv' : 'en';
+    // Enhanced language detection using knowledge base
+    const detectedLanguage = knowledgeBase.detectLanguage(content);
     console.log(`🌍 DETECTED LANGUAGE: ${detectedLanguage} for message: "${content}"`);
 
     setIsLoading(true);
@@ -97,10 +97,10 @@ export function useChat() {
       // Save user message to database
       await saveMessage(sessionId, 'user', userMessage.content);
 
-      // Check for lead capture before generating AI response
+      // Enhanced lead capture with better language handling
       const leadResult = await leadCaptureService.processMessage(
         userMessage.content,
-        detectedLanguage, // Use detected language instead of hardcoded 'sv'
+        detectedLanguage,
         sessionId
       );
 
@@ -110,7 +110,7 @@ export function useChat() {
         const thinkingMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
-          content: 'Behandlar din förfrågan...',
+          content: detectedLanguage === 'sv' ? 'Behandlar din förfrågan...' : 'Processing your request...',
           timestamp: new Date(),
           isLoading: true
         };
@@ -133,7 +133,7 @@ export function useChat() {
         setMessages(prev => [...prev, leadConfirmationMessage]);
         await saveMessage(sessionId, 'assistant', leadConfirmationMessage.content);
         
-        return { hasBookingIntent: false, response: leadResult.response };
+        return { hasBookingIntent: false, response: leadResult.response, leadCaptured: true };
       }
 
       // If user wants contact but didn't provide info, ask for it
@@ -142,7 +142,7 @@ export function useChat() {
         const thinkingMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
-          content: 'Tänker...',
+          content: detectedLanguage === 'sv' ? 'Tänker...' : 'Thinking...',
           timestamp: new Date(),
           isLoading: true
         };
@@ -179,7 +179,7 @@ export function useChat() {
       const thinkingMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: 'Tänker...',
+        content: detectedLanguage === 'sv' ? 'Tänker...' : 'Thinking...',
         timestamp: new Date(),
         isLoading: true
       };
@@ -229,10 +229,13 @@ export function useChat() {
       // Remove thinking message and add graceful error message
       setMessages(prev => prev.filter(msg => !msg.isLoading));
       
+      const detectedLanguage = knowledgeBase.detectLanguage(content);
       const errorMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: 'Ursäkta, jag har tillfälliga anslutningsproblem. Ditt meddelande har sparats och vi kommer att kontakta dig. Du kan också nå Stefan direkt på stefan@axiestudio.se eller +46 735 132 620.',
+        content: detectedLanguage === 'sv' 
+          ? 'Ursäkta, jag har tillfälliga anslutningsproblem. Ditt meddelande har sparats och vi kommer att kontakta dig. Du kan också nå Stefan direkt på stefan@axiestudio.se eller +46 735 132 620.'
+          : 'Sorry, I\'m having temporary connection issues. Your message has been saved and we will contact you. You can also reach Stefan directly at stefan@axiestudio.se or +46 735 132 620.',
         timestamp: new Date()
       };
 

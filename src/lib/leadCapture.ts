@@ -64,26 +64,36 @@ class LeadCaptureService {
     
     console.log(`🔍 CONTACT INTENT DEBUG - Language: ${language}, Message: "${lowerMessage}"`);
     
+    // Enhanced Swedish triggers
     const swedishTriggers = [
+      // Direct contact requests
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
-      'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
+      'kontakta mig senare', 'ring mig senare', 'mejla mig senare',
+      // Email/phone sharing
+      'min email', 'min e-post', 'mitt mail', 'mitt telefonnummer', 'min telefon',
+      'nå mig', 'återkoppla', 'genom', 'på', 'via',
+      // Business context
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
-      'kan du kontakta', 'kontakta mig genom', 'min e-post', 'mitt mail'
+      'kan du kontakta', 'kontakta mig genom', 'kan ni kontakta',
+      // Email patterns
+      '@', '.se', '.com', '.nu', '.org'
     ];
 
+    // Enhanced English triggers
     const englishTriggers = [
       // Primary contact triggers
       'contact me', 'call me', 'email me', 'reach out', 'get in touch',
-      'reach me', 'follow up', 'get back to me',
+      'reach me', 'follow up', 'get back to me', 'contact me later',
+      'call me later', 'email me later', 'reach me later',
       
       // Email/phone sharing
       'my email', 'my phone', 'my email is', 'email is', 'here is my email',
       'you can reach me', 'you can contact me', 'you can email me',
+      'here is my contact', 'my contact is', 'reach me at',
       
       // Contact at specific address
       'contact me at', 'reach me at', 'email me at', 'get back to me at',
-      'contact me later', 'reach me later', 'get back to me later',
       'contact me on', 'reach me on', 'get in touch at',
       
       // Business triggers
@@ -91,7 +101,10 @@ class LeadCaptureService {
       'quote', 'pricing', 'more information', 'want to know more',
       
       // Specific patterns that should trigger
-      'can you contact', 'contact me through', 'reach out at', 'email me later', 'call me at'
+      'can you contact', 'contact me through', 'reach out at', 'call me at',
+      
+      // Email patterns
+      '@', '.com', '.org', '.net', '.se'
     ];
 
     const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
