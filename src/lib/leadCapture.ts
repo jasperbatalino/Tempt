@@ -240,10 +240,10 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToReceiptFile(leadData: LeadData): Promise<void> {
+  private async saveToReceiptFile(leadData: LeadData, language: string = 'sv'): Promise<void> {
     try {
       // Create receipt content based on language
-      const receiptContent = this.generateReceiptContent(leadData);
+      const receiptContent = this.generateReceiptContent(leadData, language);
 
       // In a real environment, this would write to a server file
       // For now, we'll log it and store in localStorage as backup
@@ -263,7 +263,7 @@ class LeadCaptureService {
   }
 
   // Generate receipt content based on language
-  private generateReceiptContent(leadData: LeadData): string {
+  private generateReceiptContent(leadData: LeadData, language: string = 'sv'): string {
     const date = new Date(leadData.timestamp);
     const formattedDate = date.toLocaleString('sv-SE');
 
