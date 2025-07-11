@@ -17,37 +17,31 @@ class KnowledgeBase {
     try {
       // Load all knowledge files for both languages
       const [
-        securitySvResponse, securityEnResponse,
+        securitySvResponse,
         contextSecurityResponse,
-        companyInfoSvResponse, companyInfoEnResponse,
-        servicesSvResponse, servicesEnResponse
+        companyInfoSvResponse,
+        servicesSvResponse
       ] = await Promise.all([
         fetch('/src/data/security-sv.txt'),
-        fetch('/src/data/security-en.txt'),
         fetch('/src/data/context-security.txt'),
         fetch('/src/data/company-info-sv.txt'),
-        fetch('/src/data/company-info-en.txt'),
-        fetch('/src/data/company-services-sv.txt'),
-        fetch('/src/data/company-services-en.txt')
+        fetch('/src/data/company-services-sv.txt')
       ]);
 
       const [
-        securitySvContent, securityEnContent,
+        securitySvContent,
         contextSecurityContent,
-        companyInfoSvContent, companyInfoEnContent,
-        servicesSvContent, servicesEnContent
+        companyInfoSvContent,
+        servicesSvContent
       ] = await Promise.all([
         securitySvResponse.text(),
-        securityEnResponse.text(),
         contextSecurityResponse.text(),
         companyInfoSvResponse.text(),
-        companyInfoEnResponse.text(),
-        servicesSvResponse.text(),
-        servicesEnResponse.text()
+        servicesSvResponse.text()
       ]);
 
       this.files = [
-        // Swedish files
+        // Swedish files only
         {
           name: 'security',
           content: securitySvContent,
@@ -66,77 +60,31 @@ class KnowledgeBase {
           keywords: ['tjänster', 'service', 'hemsida', 'website', 'app', 'bokning', 'booking', 'onboarding', 'pris', 'kostnad', 'utveckling'],
           language: 'sv'
         },
-        // English files
-        {
-          name: 'security',
-          content: securityEnContent,
-          keywords: ['security', 'rules', 'policy', 'guidelines', 'moderation', 'hate', 'spam', 'inappropriate'],
-          language: 'en'
-        },
         // Context security (universal)
         {
           name: 'context-security',
           content: contextSecurityContent,
           keywords: ['context', 'redirect', 'off-topic', 'focus', 'business', 'axie studio', 'services'],
           language: 'sv' // Default, but applies to both languages
-        },
-        {
-          name: 'company-info',
-          content: companyInfoEnContent,
-          keywords: ['axie studio', 'company', 'about us', 'mission', 'vision', 'values', 'team', 'contact', 'certification'],
-          language: 'en'
-        },
-        {
-          name: 'services',
-          content: servicesEnContent,
-          keywords: ['services', 'service', 'website', 'app', 'booking', 'onboarding', 'price', 'cost', 'development'],
-          language: 'en'
         }
       ];
 
       this.isLoaded = true;
-      console.log('Multilingual knowledge base loaded successfully');
+      console.log('Swedish knowledge base loaded successfully');
     } catch (error) {
       console.error('Error loading knowledge base:', error);
     }
   }
 
-  detectLanguage(message: string): 'sv' | 'en' {
-    const lowerMessage = message.toLowerCase();
-    
-    // Swedish indicators
-    const swedishWords = [
-      'hej', 'tack', 'och', 'är', 'för', 'med', 'på', 'av', 'till', 'från',
-      'vad', 'hur', 'när', 'var', 'varför', 'kan', 'vill', 'ska', 'skulle',
-      'tjänst', 'företag', 'pris', 'kostnad', 'hemsida', 'bokning'
-    ];
-    
-    // English indicators
-    const englishWords = [
-      'hello', 'hi', 'thank', 'thanks', 'and', 'the', 'for', 'with', 'from', 'to',
-      'what', 'how', 'when', 'where', 'why', 'can', 'will', 'would', 'should',
-      'service', 'company', 'price', 'cost', 'website', 'booking'
-    ];
-
-    let swedishScore = 0;
-    let englishScore = 0;
-
-    swedishWords.forEach(word => {
-      if (lowerMessage.includes(word)) swedishScore++;
-    });
-
-    englishWords.forEach(word => {
-      if (lowerMessage.includes(word)) englishScore++;
-    });
-
-    // Default to Swedish if no clear indicators
-    return englishScore > swedishScore ? 'en' : 'sv';
+  // Always return Swedish since we only support Swedish now
+  detectLanguage(message: string): 'sv' {
+    return 'sv';
   }
 
-  needsSpecificInformation(message: string, language: 'sv' | 'en'): boolean {
+  needsSpecificInformation(message: string): boolean {
     const lowerMessage = message.toLowerCase();
     
-    // Swedish keywords
+    // Swedish keywords only
     const swedishTriggers = [
       'axie studio', 'företag', 'om er', 'om oss', 'vem är ni', 'kontakt', 'adress', 'telefon',
       'tjänst', 'service', 'pris', 'kostnad', 'hemsida', 'website', 'app', 'utveckling',
@@ -145,20 +93,10 @@ class KnowledgeBase {
       'teknologi', 'platform', 'cms', 'databas', 'hosting', 'domän'
     ];
 
-    // English keywords
-    const englishTriggers = [
-      'axie studio', 'company', 'about you', 'about us', 'who are you', 'contact', 'address', 'phone',
-      'service', 'services', 'price', 'cost', 'website', 'app', 'development',
-      'booking', 'onboarding', 'consultation',
-      'how does', 'process', 'delivery time', 'timeline', 'payment',
-      'technology', 'platform', 'cms', 'database', 'hosting', 'domain'
-    ];
-
-    const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
-    return triggers.some(keyword => lowerMessage.includes(keyword));
+    return swedishTriggers.some(keyword => lowerMessage.includes(keyword));
   }
 
-  getRelevantContext(message: string, language: 'sv' | 'en'): string {
+  getRelevantContext(message: string): string {
     if (!this.isLoaded) {
       console.warn('Knowledge base not loaded yet');
       return '';
@@ -167,8 +105,8 @@ class KnowledgeBase {
     const lowerMessage = message.toLowerCase();
     let relevantContent = '';
 
-    // Find relevant files based on keywords and language
-    const languageFiles = this.files.filter(file => file.language === language);
+    // Find relevant files based on keywords (Swedish only)
+    const languageFiles = this.files.filter(file => file.language === 'sv');
     
     for (const file of languageFiles) {
       const hasRelevantKeywords = file.keywords.some(keyword => 
@@ -183,7 +121,7 @@ class KnowledgeBase {
     }
 
     // If no specific keywords found but needs information, include company basics
-    if (!relevantContent && this.needsSpecificInformation(message, language)) {
+    if (!relevantContent && this.needsSpecificInformation(message)) {
       const companyFile = languageFiles.find(f => f.name === 'company-info');
       const servicesFile = languageFiles.find(f => f.name === 'services');
       
@@ -209,7 +147,7 @@ class KnowledgeBase {
   }
 
   // Security check for inappropriate content
-  checkSecurity(message: string, language: 'sv' | 'en'): { isViolation: boolean; reason?: string } {
+  checkSecurity(message: string): { isViolation: boolean; reason?: string } {
     const lowerMessage = message.toLowerCase();
     
     const swedishViolations = [
@@ -218,13 +156,7 @@ class KnowledgeBase {
       { keywords: ['personuppgifter', 'personnummer', 'lösenord'], reason: 'Personal information sharing' }
     ];
 
-    const englishViolations = [
-      { keywords: ['hate', 'stupid', 'idiot', 'dumb'], reason: 'Inappropriate language detected' },
-      { keywords: ['spam', 'buy now', 'free money', 'advertisement'], reason: 'Spam content detected' },
-      { keywords: ['personal data', 'social security', 'password'], reason: 'Personal information sharing' }
-    ];
-
-    const violations = language === 'sv' ? swedishViolations : englishViolations;
+    const violations = swedishViolations;
 
     for (const violation of violations) {
       if (violation.keywords.some(keyword => lowerMessage.includes(keyword))) {

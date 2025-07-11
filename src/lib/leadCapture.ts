@@ -56,9 +56,10 @@ class LeadCaptureService {
   }
 
   // Detect if user wants to be contacted
-  detectContactIntent(message: string, language: 'sv' | 'en'): boolean {
+  detectContactIntent(message: string): boolean {
     const lowerMessage = message.toLowerCase();
     
+    // Swedish triggers only
     const swedishTriggers = [
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
       'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
@@ -67,22 +68,7 @@ class LeadCaptureService {
       'kan du kontakta', 'kontakta mig genom', 'min e-post', 'mitt mail'
     ];
 
-    const englishTriggers = [
-      'contact me', 'call me', 'email me', 'reach out', 'get in touch',
-      'my email', 'my phone', 'reach me', 'follow up', 'get back to me', 'through',
-      'book appointment', 'consultation', 'meet', 'discuss more',
-      'quote', 'pricing', 'more information', 'want to know more',
-      'can you contact', 'contact me through', 'my email is', 'email is',
-      'here is my email', 'you can reach me', 'contact me at', 'reach me at',
-      'send me', 'email me at', 'my contact', 'get back to me at',
-      'contact me later', 'reach me later', 'get back to me later',
-      'contact me at', 'reach out at', 'email me later', 'call me at',
-      'you can contact me', 'you can reach me', 'you can email me',
-      'contact me on', 'reach me on', 'get in touch at'
-    ];
-
-    const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
-    return triggers.some(trigger => lowerMessage.includes(trigger));
+    return swedishTriggers.some(trigger => lowerMessage.includes(trigger));
   }
 
   // Send lead data to N8N webhooks using GET method with URL parameters
@@ -183,7 +169,7 @@ class LeadCaptureService {
   // Process message and capture lead if detected
   async processMessage(
     message: string, 
-    language: 'sv' | 'en', 
+    language: 'sv', 
     sessionId?: string
   ): Promise<{ 
     hasContactIntent: boolean; 
@@ -193,7 +179,7 @@ class LeadCaptureService {
     response?: string;
     n8nResponse?: string;
   }> {
-    const hasContactIntent = this.detectContactIntent(message, language);
+    const hasContactIntent = this.detectContactIntent(message);
     
     if (!hasContactIntent) {
       return { hasContactIntent: false, leadCaptured: false };
@@ -228,13 +214,11 @@ class LeadCaptureService {
       // Generate response based on webhook success
       let response: string;
       if (webhookResult.success) {
-        response = language === 'sv' 
-          ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`
-          : `Thank you so much! We have received your information and will contact you soon! A confirmation has been sent to${email ? ` ${email}` : ''}${phone ? ` and we've noted your phone number ${phone}` : ''}. Please check your email for more information. Would you like to know more about our services while you wait?`;
+        response = `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`;
       } else {
-        response = language === 'sv'
+        response = 
           ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
-          : `Thank you so much! We have received your information and will contact you soon! A confirmation has been sent to${email ? ` ${email}` : ''}${phone ? ` and we've noted your phone number ${phone}` : ''}. Please check your email for more information. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
+          : `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`;
       }
 
       return {
@@ -247,9 +231,7 @@ class LeadCaptureService {
       };
     } else {
       // User wants contact but didn't provide info - ask for it
-      const response = language === 'sv'
-        ? 'Absolut! Jag skulle gärna hjälpa dig. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation?'
-        : 'Absolutely! I\'d be happy to help you. Could you share your email address or phone number so we can contact you as soon as possible for a free consultation?';
+      const response = 'Absolut! Jag skulle gärna hjälpa dig. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation?';
       
       return {
         hasContactIntent: true,
@@ -260,7 +242,7 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToReceiptFile(leadData: LeadData, language: 'sv' | 'en'): Promise<void> {
+  private async saveToReceiptFile(leadData: LeadData, language: 'sv'): Promise<void> {
     try {
       // Create receipt content based on language
       const receiptContent = this.generateReceiptContent(leadData, language);
@@ -283,13 +265,10 @@ class LeadCaptureService {
   }
 
   // Generate receipt content based on language
-  private generateReceiptContent(leadData: LeadData, language: 'sv' | 'en'): string {
+  private generateReceiptContent(leadData: LeadData, language: 'sv'): string {
     const date = new Date(leadData.timestamp);
-    const formattedDate = language === 'sv' 
-      ? date.toLocaleString('sv-SE')
-      : date.toLocaleString('en-US');
+    const formattedDate = date.toLocaleString('sv-SE');
 
-    if (language === 'sv') {
       return `
 ╔══════════════════════════════════════════════════════════════╗
 ║                        AXIE STUDIO                           ║
@@ -341,70 +320,17 @@ Stefan & Axie Studio Team
 ═══════════════════════════════════════════════════════════════
 
 `;
-    } else {
-      return `
-╔══════════════════════════════════════════════════════════════╗
-║                        AXIE STUDIO                           ║
-║                   CONTACT CONFIRMATION                       ║
-╚══════════════════════════════════════════════════════════════╝
-
-📅 Date: ${formattedDate}
-
-Hello!
-
-We have received your information and will contact you soon! 
-By using our system, you agree that we process your information 
-to contact you.
-
-═══════════════════════════════════════════════════════════════
-                      CONTACT INFORMATION                      
-═══════════════════════════════════════════════════════════════
-
-📧 Email:         ${leadData.email || 'Not provided'}
-📱 Phone:         ${leadData.phone || 'Not provided'}
-💬 Message:       ${leadData.context}
-🌐 Source:        ${leadData.source}
-🆔 Session ID:    ${leadData.sessionId || 'N/A'}
-⏰ Timestamp:     ${leadData.timestamp}
-
-═══════════════════════════════════════════════════════════════
-                         NEXT STEPS                           
-═══════════════════════════════════════════════════════════════
-
-✅ Your request has been registered
-✅ We will contact you within 2 hours
-✅ Free consultation over coffee ☕
-✅ Tailored solution for your business
-
-═══════════════════════════════════════════════════════════════
-                      CONTACT US DIRECTLY                     
-═══════════════════════════════════════════════════════════════
-
-📧 Email:     stefan@axiestudio.se
-📞 Phone:     +46 735 132 620
-🌐 Website:   axiestudio.se
-📍 Location:  Jönköping, Sweden
-
-Thank you for choosing Axie Studio!
-
-Best regards,
-Stefan & Axie Studio Team
-
-═══════════════════════════════════════════════════════════════
-
-`;
-    }
   }
 
   // Download receipt as text file
-  private downloadReceiptFile(receiptContent: string, language: 'sv' | 'en'): void {
+  private downloadReceiptFile(receiptContent: string, language: 'sv'): void {
     try {
       const blob = new Blob([receiptContent], { type: 'text/plain; charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       
-      const prefix = language === 'sv' ? 'axie-kvitto' : 'axie-receipt';
+      const prefix = 'axie-kvitto';
       link.download = `${prefix}-${new Date().toISOString().split('T')[0]}-${Date.now()}.txt`;
       
       document.body.appendChild(link);
