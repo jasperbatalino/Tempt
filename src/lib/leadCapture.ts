@@ -15,22 +15,27 @@ interface WebhookResponse {
 }
 
 class LeadCaptureService {
-  private webhookUrl: string;
+  private webhookUrls: string[];
 
   constructor() {
-    this.webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://asdfasfdsvd.app.n8n.cloud/webhook/b9ba15bd-54b9-45d4-97ca-cdb31437ea11';
+    // Production and test webhook URLs
+    this.webhookUrls = [
+      'https://asdfasfdsvd.app.n8n.cloud/webhook/b9ba15bd-54b9-45d4-97ca-cdb31437ea11',
+      'https://asdfasfdsvd.app.n8n.cloud/webhook-test/b9ba15bd-54b9-45d4-97ca-cdb31437ea11'
+    ];
     
-    if (!this.webhookUrl) {
+    if (!this.webhookUrls.length) {
       console.error('N8N Webhook URL not configured');
       throw new Error('N8N Webhook URL missing from environment variables');
     }
     
-    console.log('N8N Webhook URL configured:', this.webhookUrl);
+    console.log('N8N Webhook URLs configured:', this.webhookUrls);
   }
 
   // Extract email from text using regex
   extractEmail(text: string): string | null {
-    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+    // Enhanced email regex to catch more formats including Gmail
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/gi;
     const matches = text.match(emailRegex);
     return matches ? matches[0] : null;
   }
@@ -60,55 +65,74 @@ class LeadCaptureService {
     
     const swedishTriggers = [
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
-      'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla',
+      'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
-      'offert', 'prisuppgift', 'mer information', 'vill veta mer'
+      'offert', 'prisuppgift', 'mer information', 'vill veta mer',
+      'kan du kontakta', 'kontakta mig genom'
     ];
 
     const englishTriggers = [
       'contact me', 'call me', 'email me', 'reach out', 'get in touch',
-      'my email', 'my phone', 'reach me', 'follow up', 'get back to me',
+      'my email', 'my phone', 'reach me', 'follow up', 'get back to me', 'through',
       'book appointment', 'consultation', 'meet', 'discuss more',
-      'quote', 'pricing', 'more information', 'want to know more'
+      'quote', 'pricing', 'more information', 'want to know more',
+      'can you contact', 'contact me through'
     ];
 
     const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
     return triggers.some(trigger => lowerMessage.includes(trigger));
   }
 
-  // Send lead data to N8N webhook
-  async sendToWebhook(leadData: LeadData): Promise<WebhookResponse> {
+  // Send lead data to both N8N webhooks
+  async sendToWebhooks(leadData: LeadData): Promise<WebhookResponse> {
     try {
-      const response = await fetch(this.webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: leadData.email,
-          phone: leadData.phone,
-          context: leadData.context,
-          source: leadData.source,
-          sessionId: leadData.sessionId,
-          timestamp: leadData.timestamp,
-          // Additional metadata
-          userAgent: navigator.userAgent,
-          referrer: document.referrer,
-          url: window.location.href
-        })
+      const webhookData = {
+        email: leadData.email,
+        phone: leadData.phone,
+        context: leadData.context,
+        source: leadData.source,
+        sessionId: leadData.sessionId,
+        timestamp: leadData.timestamp,
+        // Additional metadata
+        userAgent: navigator.userAgent,
+        referrer: document.referrer,
+        url: window.location.href
+      };
+
+      // Send to both webhooks simultaneously
+      const webhookPromises = this.webhookUrls.map(async (url) => {
+        console.log(`Sending lead to webhook: ${url}`);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData)
+        });
+
+        if (!response.ok) {
+          console.error(`Webhook ${url} failed: ${response.status}`);
+          return { success: false, url, status: response.status };
+        }
+
+        console.log(`Webhook ${url} success`);
+        return { success: true, url, status: response.status };
       });
 
-      if (!response.ok) {
-        throw new Error(`Webhook request failed: ${response.status}`);
+      const results = await Promise.allSettled(webhookPromises);
+      const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+      
+      if (successCount > 0) {
+        console.log(`${successCount}/${this.webhookUrls.length} webhooks succeeded`);
+        return { success: true, message: `Lead sent to ${successCount} webhook(s)` };
+      } else {
+        throw new Error('All webhooks failed');
       }
-
-      const result = await response.json();
-      return { success: true, message: result.message };
     } catch (error) {
-      console.error('Error sending to webhook:', error);
+      console.error('Error sending to webhooks:', error);
       return { 
         success: false, 
-        message: error instanceof Error ? error.message : 'Unknown error' 
+        message: error instanceof Error ? error.message : 'Unknown webhook error' 
       };
     }
   }
@@ -145,7 +169,7 @@ class LeadCaptureService {
         timestamp: new Date().toISOString()
       };
 
-      const webhookResult = await this.sendToWebhook(leadData);
+      const webhookResult = await this.sendToWebhooks(leadData);
       
       if (webhookResult.success) {
         // Save to database as well
@@ -157,8 +181,8 @@ class LeadCaptureService {
         }
 
         const response = language === 'sv' 
-          ? `Tack! Jag har registrerat din kontaktinformation${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. Stefan kommer att kontakta dig inom kort för att diskutera dina behov.`
-          : `Thank you! I've registered your contact information${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. Stefan will contact you shortly to discuss your needs.`;
+          ? `Perfekt! Tack för din kontaktinformation${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. Vi kommer att kontakta dig så snart som möjligt för att diskutera dina behov. Vill du veta mer om våra tjänster medan du väntar? Vi erbjuder webbplatser, bokningssystem, appar och kompletta digitala lösningar.`
+          : `Perfect! Thank you for your contact information${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. We will contact you as soon as possible to discuss your needs. Would you like to know more about our services while you wait? We offer websites, booking systems, apps, and complete digital solutions.`;
 
         return {
           hasContactIntent: true,
@@ -169,8 +193,8 @@ class LeadCaptureService {
         };
       } else {
         const response = language === 'sv'
-          ? 'Tack för ditt intresse! Det blev ett tekniskt problem, men du kan alltid kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620.'
-          : 'Thank you for your interest! There was a technical issue, but you can always contact Stefan directly at stefan@axiestudio.se or +46 735 132 620.';
+          ? 'Tack för ditt intresse! Vi kommer att kontakta dig så snart som möjligt. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?'
+          : 'Thank you for your interest! We will contact you as soon as possible. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?';
         
         return {
           hasContactIntent: true,
@@ -181,8 +205,8 @@ class LeadCaptureService {
     } else {
       // User wants contact but didn't provide info - ask for it
       const response = language === 'sv'
-        ? 'Jag skulle gärna hjälpa dig! Kan du dela din e-postadress eller telefonnummer så kan Stefan kontakta dig för en kostnadsfri konsultation?'
-        : 'I\'d be happy to help you! Could you share your email address or phone number so Stefan can contact you for a free consultation?';
+        ? 'Absolut! Jag skulle gärna hjälpa dig. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation?'
+        : 'Absolutely! I\'d be happy to help you. Could you share your email address or phone number so we can contact you as soon as possible for a free consultation?';
       
       return {
         hasContactIntent: true,
