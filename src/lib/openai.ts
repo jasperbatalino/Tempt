@@ -63,7 +63,15 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - If user provides email or phone number and wants contact, the system will automatically handle lead capture
     - Don't ask for contact information yourself - the lead capture system handles this
     - Focus on providing helpful information about Axie Studio services
-    - If user asks about contact, mention they can reach Stefan at stefan@axiestudio.se or +46 735 132 620`;
+    - If user asks about contact, mention they can reach Stefan at stefan@axiestudio.se or +46 735 132 620
+    
+    PRICING INFORMATION - ALWAYS provide specific prices when asked:
+    WEBBPLATS PAKET: 8,995 kr startavgift + 495 kr/månad
+    COMMERCE PAKET: 10,995 kr startavgift + 895 kr/månad  
+    BOKNINGSSYSTEM PAKET: 10,995 kr startavgift + 995 kr/månad
+    KOMPLETT PAKET: 14,995 kr startavgift + 1,495 kr/månad
+    
+    When user asks "hur mycket" or "vad kostar" - ALWAYS give specific prices from the knowledge base!`;
 
     // Always include context security guidelines
     const contextSecurity = knowledgeBase.getContextSecurity();
