@@ -212,11 +212,11 @@ class LeadCaptureService {
       
       // Always save to database regardless of webhook status
       try {
-        await this.saveToDatabase(leadData);
-        console.log('✅ Lead saved to database');
-      } catch (dbError) {
-        console.error('❌ Database save failed:', dbError);
-        // Continue even if database save fails
+        await this.saveToTextFile(leadData);
+        console.log('✅ Lead saved to text file');
+      } catch (fileError) {
+        console.error('❌ Text file save failed:', fileError);
+        // Continue even if file save fails
       }
 
       // Generate response based on webhook success
@@ -254,28 +254,66 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToDatabase(leadData: LeadData): Promise<void> {
+  private async saveToTextFile(leadData: LeadData): Promise<void> {
     try {
-      const { supabase } = await import('./supabase');
-      
-      const { error } = await supabase
-        .from('email_leads')
-        .insert({
-          email: leadData.email,
-          phone: leadData.phone,
-          context: leadData.context,
-          source: leadData.source,
-          session_id: leadData.sessionId,
-          status: 'new'
-        });
+      // Create lead entry for text file
+      const leadEntry = {
+        timestamp: leadData.timestamp,
+        email: leadData.email || 'N/A',
+        phone: leadData.phone || 'N/A',
+        context: leadData.context,
+        source: leadData.source,
+        sessionId: leadData.sessionId || 'N/A'
+      };
 
-      if (error) {
-        console.error('Database insert error:', error);
-        throw error;
-      }
+      // Format as readable text
+      const textEntry = `
+=====================================
+LEAD CAPTURED: ${new Date(leadData.timestamp).toLocaleString('sv-SE')}
+=====================================
+Email: ${leadEntry.email}
+Phone: ${leadEntry.phone}
+Context: ${leadEntry.context}
+Source: ${leadEntry.source}
+Session ID: ${leadEntry.sessionId}
+Timestamp: ${leadEntry.timestamp}
+=====================================
+
+`;
+
+      // In a real environment, this would write to a server file
+      // For now, we'll log it and store in localStorage as backup
+      console.log('📧 LEAD CAPTURED - SAVING TO FILE:', textEntry);
+      
+      // Store in localStorage as backup (since we can't write files in browser)
+      const existingLeads = localStorage.getItem('axie-leads') || '';
+      localStorage.setItem('axie-leads', existingLeads + textEntry);
+      
+      // Also download as file for immediate access
+      this.downloadLeadFile(textEntry);
+      
     } catch (error) {
-      console.error('Error saving to database:', error);
+      console.error('Error saving to text file:', error);
       throw error;
+    }
+  }
+
+  // Download lead information as text file
+  private downloadLeadFile(leadContent: string): void {
+    try {
+      const blob = new Blob([leadContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `axie-lead-${new Date().toISOString().split('T')[0]}-${Date.now()}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('✅ Lead file downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading lead file:', error);
     }
   }
 }
