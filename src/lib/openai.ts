@@ -45,7 +45,7 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - När användaren säger "boka" - använd BOOKING_CONFIRMED:onboarding direkt
     - Använd ALDRIG markdown-formatering 
     - BOOKING_CONFIRMED ska INTE synas i svaret till användaren
-    - Ge alltid rena, professionella svar utan formatering
+    - Ge alltid rena, professionella svar utan formatering`;
     
     // Add relevant context if needed
     if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content)) {
@@ -93,7 +93,5 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Kunde inte ansluta till AI-tjänsten');
-  }
-}
   }
 }
