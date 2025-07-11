@@ -84,6 +84,20 @@ export function useChat() {
 
       // If lead was captured, show confirmation message
       if (leadResult.leadCaptured && leadResult.response) {
+        // Add thinking message first
+        const thinkingMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: 'Behandlar din förfrågan...',
+          timestamp: new Date(),
+          isLoading: true
+        };
+
+        setMessages(prev => [...prev, thinkingMessage]);
+
+        // Wait 2 seconds for realistic processing time
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         // Remove thinking message and add lead confirmation
         setMessages(prev => prev.filter(msg => !msg.isLoading));
         
@@ -97,15 +111,25 @@ export function useChat() {
         setMessages(prev => [...prev, leadConfirmationMessage]);
         await saveMessage(sessionId, 'assistant', leadConfirmationMessage.content);
         
-        return { 
-          hasBookingIntent: false, 
-          response: leadResult.response,
-          leadCaptured: true
-        };
+        return { hasBookingIntent: false, response: leadResult.response };
       }
 
       // If user wants contact but didn't provide info, ask for it
       if (leadResult.hasContactIntent && !leadResult.leadCaptured && leadResult.response) {
+        // Add thinking message first
+        const thinkingMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: 'Tänker...',
+          timestamp: new Date(),
+          isLoading: true
+        };
+
+        setMessages(prev => [...prev, thinkingMessage]);
+
+        // Wait 1 second for thinking animation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Remove thinking message and add request for contact info
         setMessages(prev => prev.filter(msg => !msg.isLoading));
         

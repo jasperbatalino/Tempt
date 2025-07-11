@@ -62,14 +62,8 @@ const Chatbot = () => {
       
       // Check for lead capture confirmation
       if (result?.leadCaptured) {
-        setLeadData({
-          email: result.email || leadResult?.email,
-          phone: result.phone || leadResult?.phone,
-          n8nResponse: result.n8nResponse || leadResult?.n8nResponse
-        });
-        setTimeout(() => {
-          setShowConfirmation(true);
-        }, 1000); // Show modal after 1 second
+        // Lead confirmation is now handled in the chat message itself
+        // No modal needed as per user request
       }
       
       if (result?.hasBookingIntent && result?.serviceType) {

@@ -223,12 +223,12 @@ class LeadCaptureService {
       let response: string;
       if (webhookResult.success) {
         response = language === 'sv' 
-          ? `Perfekt! Tack för din kontaktinformation${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. Vi kommer att kontakta dig så snart som möjligt för att diskutera dina behov. Vill du veta mer om våra tjänster medan du väntar? Vi erbjuder webbplatser, bokningssystem, appar och kompletta digitala lösningar.`
-          : `Perfect! Thank you for your contact information${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. We will contact you as soon as possible to discuss your needs. Would you like to know more about our services while you wait? We offer websites, booking systems, apps, and complete digital solutions.`;
+          ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`
+          : `Thank you so much! We have sent a confirmation to${email ? ` ${email}` : ''}${phone ? ` and noted your phone number ${phone}` : ''}. Please check your email for more information. Would you like to know more about our services while you wait?`;
       } else {
         response = language === 'sv'
-          ? `Tack för din kontaktinformation${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}! Vi har registrerat din förfrågan och kommer att kontakta dig så snart som möjligt. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
-          : `Thank you for your contact information${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}! We have registered your request and will contact you as soon as possible. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
+          ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
+          : `Thank you so much! We have sent a confirmation to${email ? ` ${email}` : ''}${phone ? ` and noted your phone number ${phone}` : ''}. Please check your email for more information. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
       }
 
       return {
