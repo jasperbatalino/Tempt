@@ -59,14 +59,14 @@ class LeadCaptureService {
   detectContactIntent(message: string): boolean {
     const lowerMessage = message.toLowerCase();
     
-    // Swedish triggers only
+    // ENDAST SVENSKA triggers
     const swedishTriggers = [
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
-      'min email', 'my email', 'save my email', 'spara min e post', 'spara min email',
+      'spara min e post', 'spara min email', 'min e-post', 'mitt mail',
       'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
-      'kan du kontakta', 'kontakta mig genom', 'min e-post', 'mitt mail'
+      'kan du kontakta', 'kontakta mig genom', 'skicka till mig'
     ];
 
     return swedishTriggers.some(trigger => lowerMessage.includes(trigger));
