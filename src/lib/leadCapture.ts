@@ -204,7 +204,7 @@ class LeadCaptureService {
       
       // Always save to database regardless of webhook status
       try {
-        await this.saveToReceiptFile(leadData, language);
+        await this.saveToReceiptFile(leadData);
         console.log('✅ Receipt saved to file');
       } catch (fileError) {
         console.error('❌ Receipt file save failed:', fileError);
