@@ -168,8 +168,7 @@ class LeadCaptureService {
 
   // Process message and capture lead if detected
   async processMessage(
-    message: string, 
-    language: 'sv', 
+    message: string,
     sessionId?: string
   ): Promise<{ 
     hasContactIntent: boolean; 
@@ -216,9 +215,7 @@ class LeadCaptureService {
       if (webhookResult.success) {
         response = `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`;
       } else {
-        response = 
-          ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
-          : `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`;
+        response = `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`;
       }
 
       return {
@@ -242,10 +239,10 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToReceiptFile(leadData: LeadData, language: 'sv'): Promise<void> {
+  private async saveToReceiptFile(leadData: LeadData): Promise<void> {
     try {
       // Create receipt content based on language
-      const receiptContent = this.generateReceiptContent(leadData, language);
+      const receiptContent = this.generateReceiptContent(leadData);
 
       // In a real environment, this would write to a server file
       // For now, we'll log it and store in localStorage as backup
@@ -256,7 +253,7 @@ class LeadCaptureService {
       localStorage.setItem('axie-receipts', existingReceipts + receiptContent);
       
       // Also download as file for immediate access
-      this.downloadReceiptFile(receiptContent, language);
+      this.downloadReceiptFile(receiptContent);
       
     } catch (error) {
       console.error('Error saving receipt file:', error);
@@ -265,11 +262,11 @@ class LeadCaptureService {
   }
 
   // Generate receipt content based on language
-  private generateReceiptContent(leadData: LeadData, language: 'sv'): string {
+  private generateReceiptContent(leadData: LeadData): string {
     const date = new Date(leadData.timestamp);
     const formattedDate = date.toLocaleString('sv-SE');
 
-      return `
+    return `
 ╔══════════════════════════════════════════════════════════════╗
 ║                        AXIE STUDIO                           ║
 ║                   KONTAKTBEKRÄFTELSE                         ║
@@ -323,7 +320,7 @@ Stefan & Axie Studio Team
   }
 
   // Download receipt as text file
-  private downloadReceiptFile(receiptContent: string, language: 'sv'): void {
+  private downloadReceiptFile(receiptContent: string): void {
     try {
       const blob = new Blob([receiptContent], { type: 'text/plain; charset=utf-8' });
       const url = window.URL.createObjectURL(blob);

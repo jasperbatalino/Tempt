@@ -78,7 +78,6 @@ export function useChat() {
       // Check for lead capture before generating AI response
       const leadResult = await leadCaptureService.processMessage(
         userMessage.content,
-        'sv',
         sessionId
       );
 
