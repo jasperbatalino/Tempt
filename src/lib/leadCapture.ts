@@ -103,24 +103,14 @@ class LeadCaptureService {
       const webhookPromises = this.webhookUrls.map(async (url, index) => {
         console.log(`Sending lead to webhook: ${url}`);
         
-        // Use GET request with URL parameters for N8N webhooks
-        const params = new URLSearchParams({
-          email: leadData.email || '',
-          phone: leadData.phone || '',
-          context: leadData.context,
-          source: leadData.source,
-          sessionId: leadData.sessionId || '',
-          timestamp: leadData.timestamp,
-          userAgent: navigator.userAgent,
-          referrer: document.referrer,
-          url: window.location.href
-        });
-
-        const response = await fetch(`${url}?${params.toString()}`, {
-          method: 'GET',
+        // Use POST request with JSON body for N8N webhooks
+        const response = await fetch(url, {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'Accept': 'application/json',
-          }
+          },
+          body: JSON.stringify(webhookData)
         });
 
         if (!response.ok) {
