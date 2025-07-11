@@ -18,12 +18,14 @@ class LeadCaptureService {
   private webhookUrl: string;
 
   constructor() {
-    this.webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+    this.webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://asdfasfdsvd.app.n8n.cloud/webhook/b9ba15bd-54b9-45d4-97ca-cdb31437ea11';
     
     if (!this.webhookUrl) {
       console.error('N8N Webhook URL not configured');
       throw new Error('N8N Webhook URL missing from environment variables');
     }
+    
+    console.log('N8N Webhook URL configured:', this.webhookUrl);
   }
 
   // Extract email from text using regex
