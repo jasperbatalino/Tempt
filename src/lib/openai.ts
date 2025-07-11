@@ -49,18 +49,16 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     
     BOKNINGSLOGIK:
     När användaren vill boka något, identifiera tjänsten och svara med:
-    - BOOKING_SUGGEST:onboarding för allmän konsultation eller onboarding
-    - BOOKING_SUGGEST:website för hemsidor eller webbdesign
-    - BOOKING_SUGGEST:booking-system för bokningssystem
-    - BOOKING_SUGGEST:app-development för apputveckling
-    - BOOKING_SUGGEST:complete-service för kompletta lösningar
+    - BOOKING_CONFIRMED:onboarding för allmän konsultation eller onboarding
+    - BOOKING_CONFIRMED:website för hemsidor eller webbdesign
+    - BOOKING_CONFIRMED:booking-system för bokningssystem
+    - BOOKING_CONFIRMED:app-development för apputveckling
+    - BOOKING_CONFIRMED:complete-service för kompletta lösningar
     
-    När användaren säger "boka", "ja", "absolut", "säkert", "okej" eller bekräftar bokning:
-    - BOOKING_CONFIRMED:onboarding för att öppna bokningsmodalen direkt
+    När användaren säger "boka" → använd BOOKING_CONFIRMED:onboarding direkt för att öppna bokningsmodalen
     
     SVARSREGLER:
     - Använd emojis för att visa entusiasm och energi! 🚀💪⭐🎯✨
-    - När användaren säger "boka" → använd BOOKING_CONFIRMED:onboarding direkt
     - BOOKING_CONFIRMED/BOOKING_SUGGEST ska ALDRIG synas för användaren
     - Ingen markdown-formatering - bara ren text med emojis
     - Fokusera på värde och fördelar, inte bara funktioner

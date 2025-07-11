@@ -179,7 +179,10 @@ class LeadCaptureService {
     response?: string;
     n8nResponse?: string;
   }> {
+    console.log('🔍 Processing message for lead capture:', message);
+    
     const hasContactIntent = this.detectContactIntent(message);
+    console.log('📧 Has contact intent:', hasContactIntent);
     
     if (!hasContactIntent) {
       return { hasContactIntent: false, leadCaptured: false };
@@ -187,9 +190,13 @@ class LeadCaptureService {
 
     const email = this.extractEmail(message);
     const phone = this.extractPhone(message);
+    console.log('📧 Extracted email:', email);
+    console.log('📱 Extracted phone:', phone);
 
     // Only send to webhook if we have contact information
     if (email || phone) {
+      console.log('✅ Contact info found, processing lead...');
+      
       const leadData: LeadData = {
         email: email || undefined,
         phone: phone || undefined,
@@ -201,10 +208,11 @@ class LeadCaptureService {
 
       // Try to send to webhooks, but don't fail if they're down
       const webhookResult = await this.sendToWebhooks(leadData);
+      console.log('🔗 Webhook result:', webhookResult);
       
       // Always save to database regardless of webhook status
       try {
-        await this.saveToReceiptFile(leadData);
+        await this.saveToReceiptFile(leadData, 'sv');
         console.log('✅ Receipt saved to file');
       } catch (fileError) {
         console.error('❌ Receipt file save failed:', fileError);
@@ -214,9 +222,9 @@ class LeadCaptureService {
       // Generate response based on webhook success
       let response: string;
       if (webhookResult.success) {
-        response = `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`;
+        response = `Perfekt! 🎉 Tack så mycket! Vi har registrerat din information:${email ? `\n📧 E-post: ${email}` : ''}${phone ? `\n📱 Telefon: ${phone}` : ''}\n\nEn bekräftelse har skickats och Stefan kommer att kontakta dig inom 2 timmar för en kostnadsfri konsultation över kaffe! ☕\n\nVill du veta mer om våra tjänster medan du väntar? 🚀`;
       } else {
-        response = `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`;
+        response = `Perfekt! 🎉 Tack så mycket! Vi har registrerat din information:${email ? `\n📧 E-post: ${email}` : ''}${phone ? `\n📱 Telefon: ${phone}` : ''}\n\nStefan kommer att kontakta dig inom 2 timmar för en kostnadsfri konsultation över kaffe! ☕ Du kan också nå honom direkt på stefan@axiestudio.se eller +46 735 132 620.\n\nVill du veta mer om våra tjänster medan du väntar? 🚀`;
       }
 
       return {
@@ -229,7 +237,7 @@ class LeadCaptureService {
       };
     } else {
       // User wants contact but didn't provide info - ask for it
-      const response = 'Absolut! Jag skulle gärna hjälpa dig. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation?';
+      const response = 'Fantastiskt! 🚀 Jag skulle gärna hjälpa dig få kontakt med Stefan. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation över kaffe? ☕✨';
       
       return {
         hasContactIntent: true,
@@ -240,10 +248,10 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToReceiptFile(leadData: LeadData): Promise<void> {
+  private async saveToReceiptFile(leadData: LeadData, language: string = 'sv'): Promise<void> {
     try {
       // Create receipt content based on language
-      const receiptContent = this.generateReceiptContent(leadData);
+      const receiptContent = this.generateReceiptContent(leadData, language);
 
       // In a real environment, this would write to a server file
       // For now, we'll log it and store in localStorage as backup
@@ -263,7 +271,7 @@ class LeadCaptureService {
   }
 
   // Generate receipt content based on language
-  private generateReceiptContent(leadData: LeadData): string {
+  private generateReceiptContent(leadData: LeadData, language: string = 'sv'): string {
     const date = new Date(leadData.timestamp);
     const formattedDate = date.toLocaleString('sv-SE');
 
