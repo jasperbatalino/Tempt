@@ -95,3 +95,5 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     throw new Error('Kunde inte ansluta till AI-tjänsten');
   }
 }
+  }
+}
