@@ -22,6 +22,24 @@ export function useChat() {
   useEffect(() => {
     const initializeChat = async () => {
       try {
+        // Check if Supabase is properly configured
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+          console.error('Supabase configuration missing. Please check your .env file.');
+          // Continue with offline mode - just show welcome message
+          const welcomeMessage: Message = {
+            id: uuidv4(),
+            role: 'assistant',
+            content: 'Hej! Jag är Axie, din AI-assistent från Axie Studio. 🚀\n\nJag hjälper dig med:\n• Professionella webbplatser\n• Bokningssystem\n• Mobilappar\n• E-handelslösningar\n\nHur kan jag hjälpa dig idag?\n\n⚠️ Obs: Chathistorik sparas inte just nu på grund av anslutningsproblem.',
+            timestamp: new Date()
+          };
+          setMessages([welcomeMessage]);
+          setIsInitialized(true);
+          return;
+        }
+
         // Create new session
         const session = await createChatSession();
         setSessionId(session.id);
