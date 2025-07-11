@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase, createChatSession, saveMessage, loadChatHistory, updateSessionTitle } from '../lib/supabase';
 import { generateResponse, ChatMessage } from '../lib/openai';
 import { leadCaptureService } from '../lib/leadCapture';
+import { knowledgeBase } from '../lib/knowledgeBase';
 
 export interface Message {
   id: string;
