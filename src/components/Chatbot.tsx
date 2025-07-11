@@ -63,9 +63,9 @@ const Chatbot = () => {
       // Check for lead capture confirmation
       if (result?.leadCaptured) {
         setLeadData({
-          email: result.email,
-          phone: result.phone,
-          n8nResponse: result.n8nResponse
+          email: result.email || leadResult?.email,
+          phone: result.phone || leadResult?.phone,
+          n8nResponse: result.n8nResponse || leadResult?.n8nResponse
         });
         setTimeout(() => {
           setShowConfirmation(true);
@@ -80,6 +80,7 @@ const Chatbot = () => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      // Don't show error to user - the useChat hook handles it gracefully
     }
   }, [input, isLoading, sendMessage]);
 

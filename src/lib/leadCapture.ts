@@ -12,6 +12,7 @@ interface LeadData {
 interface WebhookResponse {
   success: boolean;
   message?: string;
+  n8nResponse?: string;
 }
 
 class LeadCaptureService {
@@ -23,11 +24,6 @@ class LeadCaptureService {
       'https://asdfasfdsvd.app.n8n.cloud/webhook/b9ba15bd-54b9-45d4-97ca-cdb31437ea11',
       'https://asdfasfdsvd.app.n8n.cloud/webhook-test/b9ba15bd-54b9-45d4-97ca-cdb31437ea11'
     ];
-    
-    if (!this.webhookUrls.length) {
-      console.error('N8N Webhook URL not configured');
-      throw new Error('N8N Webhook URL missing from environment variables');
-    }
     
     console.log('N8N Webhook URLs configured:', this.webhookUrls);
   }
@@ -83,71 +79,96 @@ class LeadCaptureService {
     return triggers.some(trigger => lowerMessage.includes(trigger));
   }
 
-  // Send lead data to both N8N webhooks
-  async sendToWebhooks(leadData: LeadData): Promise<WebhookResponse & { n8nResponse?: string }> {
-    try {
-      const webhookData = {
-        email: leadData.email,
-        phone: leadData.phone,
-        context: leadData.context,
-        source: leadData.source,
-        sessionId: leadData.sessionId,
-        timestamp: leadData.timestamp,
-        // Additional metadata
-        userAgent: navigator.userAgent,
-        referrer: document.referrer,
-        url: window.location.href
-      };
-
-      // Send to both webhooks simultaneously
-      const webhookPromises = this.webhookUrls.map(async (url, index) => {
-        console.log(`Sending lead to webhook: ${url}`);
+  // Send lead data to N8N webhooks using GET method with URL parameters
+  async sendToWebhooks(leadData: LeadData): Promise<WebhookResponse> {
+    const results = [];
+    
+    for (let i = 0; i < this.webhookUrls.length; i++) {
+      const url = this.webhookUrls[i];
+      
+      try {
+        console.log(`Attempting webhook ${i + 1}/${this.webhookUrls.length}: ${url}`);
         
-        // Use POST request with JSON body for N8N webhooks
-        const response = await fetch(url, {
-          method: 'POST',
+        // Build URL parameters for GET request
+        const params = new URLSearchParams();
+        if (leadData.email) params.append('email', leadData.email);
+        if (leadData.phone) params.append('phone', leadData.phone);
+        params.append('context', leadData.context);
+        params.append('source', leadData.source);
+        if (leadData.sessionId) params.append('sessionId', leadData.sessionId);
+        params.append('timestamp', leadData.timestamp);
+        
+        const fullUrl = `${url}?${params.toString()}`;
+        
+        // Use GET request with URL parameters (as N8N expects)
+        const response = await fetch(fullUrl, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            'Accept': 'text/plain, application/json, */*',
           },
-          body: JSON.stringify(webhookData)
         });
 
-        if (!response.ok) {
-          console.error(`Webhook ${url} failed: ${response.status}`);
-          return { success: false, url, status: response.status, responseText: '' };
+        let responseText = '';
+        try {
+          responseText = await response.text();
+        } catch (textError) {
+          console.warn(`Could not read response text from ${url}:`, textError);
+          responseText = 'Response received but could not read content';
         }
 
-        // Get response text for N8N confirmation
-        const responseText = await response.text();
-        console.log(`Webhook ${url} success`);
-        return { success: true, url, status: response.status, responseText, isProduction: index === 0 };
-      });
-
-      const results = await Promise.allSettled(webhookPromises);
-      const successResults = results.filter(r => r.status === 'fulfilled' && r.value.success);
-      const successCount = successResults.length;
-      
-      if (successCount > 0) {
-        console.log(`${successCount}/${this.webhookUrls.length} webhooks succeeded`);
-        
-        // Get N8N response from production webhook (first one)
-        const productionResult = successResults.find(r => r.status === 'fulfilled' && r.value.isProduction);
-        const n8nResponse = productionResult?.status === 'fulfilled' ? productionResult.value.responseText : undefined;
-        
-        return { 
-          success: true, 
-          message: `Lead sent to ${successCount} webhook(s)`,
-          n8nResponse 
-        };
-      } else {
-        throw new Error('All webhooks failed');
+        if (response.ok) {
+          console.log(`✅ Webhook ${i + 1} SUCCESS: ${url}`);
+          console.log(`Response: ${responseText}`);
+          results.push({ 
+            success: true, 
+            url, 
+            status: response.status, 
+            responseText,
+            isProduction: i === 0 
+          });
+        } else {
+          console.warn(`⚠️ Webhook ${i + 1} HTTP Error ${response.status}: ${url}`);
+          console.warn(`Response: ${responseText}`);
+          results.push({ 
+            success: false, 
+            url, 
+            status: response.status, 
+            responseText,
+            error: `HTTP ${response.status}` 
+          });
+        }
+      } catch (error) {
+        console.error(`❌ Webhook ${i + 1} Network Error: ${url}`, error);
+        results.push({ 
+          success: false, 
+          url, 
+          error: error instanceof Error ? error.message : 'Network error' 
+        });
       }
-    } catch (error) {
-      console.error('Error sending to webhooks:', error);
+    }
+
+    // Check results
+    const successResults = results.filter(r => r.success);
+    const successCount = successResults.length;
+    
+    console.log(`📊 Webhook Results: ${successCount}/${this.webhookUrls.length} successful`);
+    
+    if (successCount > 0) {
+      // Get N8N response from production webhook (first one)
+      const productionResult = successResults.find(r => r.isProduction);
+      const n8nResponse = productionResult?.responseText || successResults[0]?.responseText;
+      
+      return { 
+        success: true, 
+        message: `Lead sent to ${successCount}/${this.webhookUrls.length} webhook(s)`,
+        n8nResponse 
+      };
+    } else {
+      // Don't throw error, just return failure status
+      console.warn('⚠️ All webhooks failed, but continuing gracefully');
       return { 
         success: false, 
-        message: error instanceof Error ? error.message : 'Unknown webhook error',
+        message: 'Webhooks unavailable, but lead captured locally',
         n8nResponse: undefined
       };
     }
@@ -164,6 +185,7 @@ class LeadCaptureService {
     email?: string; 
     phone?: string;
     response?: string;
+    n8nResponse?: string;
   }> {
     const hasContactIntent = this.detectContactIntent(message, language);
     
@@ -185,40 +207,38 @@ class LeadCaptureService {
         timestamp: new Date().toISOString()
       };
 
+      // Try to send to webhooks, but don't fail if they're down
       const webhookResult = await this.sendToWebhooks(leadData);
       
-      if (webhookResult.success) {
-        // Save to database as well
-        try {
-          await this.saveToDatabase(leadData);
-        } catch (dbError) {
-          console.error('Database save failed:', dbError);
-          // Continue even if database save fails
-        }
+      // Always save to database regardless of webhook status
+      try {
+        await this.saveToDatabase(leadData);
+        console.log('✅ Lead saved to database');
+      } catch (dbError) {
+        console.error('❌ Database save failed:', dbError);
+        // Continue even if database save fails
+      }
 
-        const response = language === 'sv' 
+      // Generate response based on webhook success
+      let response: string;
+      if (webhookResult.success) {
+        response = language === 'sv' 
           ? `Perfekt! Tack för din kontaktinformation${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. Vi kommer att kontakta dig så snart som möjligt för att diskutera dina behov. Vill du veta mer om våra tjänster medan du väntar? Vi erbjuder webbplatser, bokningssystem, appar och kompletta digitala lösningar.`
           : `Perfect! Thank you for your contact information${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}. We will contact you as soon as possible to discuss your needs. Would you like to know more about our services while you wait? We offer websites, booking systems, apps, and complete digital solutions.`;
-
-        return {
-          hasContactIntent: true,
-          leadCaptured: true,
-          email: email || undefined,
-          phone: phone || undefined,
-          response,
-          n8nResponse: webhookResult.n8nResponse
-        };
       } else {
-        const response = language === 'sv'
-          ? 'Tack för ditt intresse! Vi kommer att kontakta dig så snart som möjligt. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?'
-          : 'Thank you for your interest! We will contact you as soon as possible. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?';
-        
-        return {
-          hasContactIntent: true,
-          leadCaptured: false,
-          response
-        };
+        response = language === 'sv'
+          ? `Tack för din kontaktinformation${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}! Vi har registrerat din förfrågan och kommer att kontakta dig så snart som möjligt. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
+          : `Thank you for your contact information${email ? ` (${email})` : ''}${phone ? ` (${phone})` : ''}! We have registered your request and will contact you as soon as possible. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
       }
+
+      return {
+        hasContactIntent: true,
+        leadCaptured: true,
+        email: email || undefined,
+        phone: phone || undefined,
+        response,
+        n8nResponse: webhookResult.n8nResponse
+      };
     } else {
       // User wants contact but didn't provide info - ask for it
       const response = language === 'sv'

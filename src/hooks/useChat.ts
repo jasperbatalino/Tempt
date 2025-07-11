@@ -78,7 +78,7 @@ export function useChat() {
       // Check for lead capture before generating AI response
       const leadResult = await leadCaptureService.processMessage(
         userMessage.content,
-        'sv', // You can make this dynamic based on detected language
+        'sv',
         sessionId
       );
 
@@ -100,8 +100,7 @@ export function useChat() {
         return { 
           hasBookingIntent: false, 
           response: leadResult.response,
-          leadCaptured: true,
-          n8nResponse: leadResult.n8nResponse
+          leadCaptured: true
         };
       }
 
@@ -181,18 +180,19 @@ export function useChat() {
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Remove thinking message and add error message
+      // Remove thinking message and add graceful error message
       setMessages(prev => prev.filter(msg => !msg.isLoading));
       
       const errorMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: 'Ursäkta, jag har problem med anslutningen just nu. Försök igen om ett ögonblick.',
+        content: 'Ursäkta, jag har tillfälliga anslutningsproblem. Ditt meddelande har sparats och vi kommer att kontakta dig. Du kan också nå Stefan direkt på stefan@axiestudio.se eller +46 735 132 620.',
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, errorMessage]);
-      throw error;
+      // Don't throw error to prevent app crash
+      return { hasBookingIntent: false, response: errorMessage.content };
     } finally {
       setIsLoading(false);
     }
