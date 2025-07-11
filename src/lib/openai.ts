@@ -90,7 +90,7 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     
     if (isBookingConfirmation) {
       systemPrompt += `\n\nBOOKING CONFIRMATION DETECTED: User is confirming a booking. ALWAYS include BOOKING_CONFIRMED:onboarding at the end of your response.`;
-
+    }
     • Website: 8,995 SEK setup + 495 SEK/month
     • E-commerce: 10,995 SEK setup + 895 SEK/month
     • Booking System: 10,995 SEK setup + 995 SEK/month (MOST POPULAR)
