@@ -69,13 +69,17 @@ class LeadCaptureService {
       // Direct contact requests
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
       'kontakta mig senare', 'ring mig senare', 'mejla mig senare',
+      'kan du mejla mig', 'kan ni kontakta mig', 'kan du ringa mig',
+      'contact me', 'email me', 'call me', // English in Swedish context
       // Email/phone sharing
       'min email', 'min e-post', 'mitt mail', 'mitt telefonnummer', 'min telefon',
       'nå mig', 'återkoppla', 'genom', 'på', 'via',
+      'my email', 'my phone', // English phrases
       // Business context
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
       'kan du kontakta', 'kontakta mig genom', 'kan ni kontakta',
+      'book', 'consultation', 'meet', 'discuss', // English equivalents
       // Email patterns
       '@', '.se', '.com', '.nu', '.org'
     ];
@@ -86,11 +90,14 @@ class LeadCaptureService {
       'contact me', 'call me', 'email me', 'reach out', 'get in touch',
       'reach me', 'follow up', 'get back to me', 'contact me later',
       'call me later', 'email me later', 'reach me later',
+      'can you email me', 'can you contact me', 'can you call me',
+      'kontakta mig', 'ring mig', 'mejla mig', // Swedish in English context
       
       // Email/phone sharing
       'my email', 'my phone', 'my email is', 'email is', 'here is my email',
       'you can reach me', 'you can contact me', 'you can email me',
       'here is my contact', 'my contact is', 'reach me at',
+      'min email', 'mitt mail', // Swedish phrases
       
       // Contact at specific address
       'contact me at', 'reach me at', 'email me at', 'get back to me at',
@@ -99,6 +106,7 @@ class LeadCaptureService {
       // Business triggers
       'book appointment', 'consultation', 'meet', 'discuss more',
       'quote', 'pricing', 'more information', 'want to know more',
+      'boka tid', 'konsultation', 'träffa', // Swedish equivalents
       
       // Specific patterns that should trigger
       'can you contact', 'contact me through', 'reach out at', 'call me at',

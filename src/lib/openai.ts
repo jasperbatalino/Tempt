@@ -53,10 +53,11 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - Använd aldrig markdown-formatering (**, *, etc.)
     
     BOKNINGSHANTERING:
-    När användaren vill boka något:
-    - Identifiera vilken tjänst: "BOOKING_SUGGEST:service-type"
-    - Vid bekräftelse: "BOOKING_CONFIRMED:service-type"
+    När användaren vill boka något eller säger "boka tid", "ja", "visst":
+    - ALLTID lägg till BOOKING_CONFIRMED:service-type i slutet av ditt svar
     - Tjänsttyper: onboarding, website, booking-system, app-development, complete-service
+    - Exempel: "Perfekt! Jag öppnar bokningskalendern för dig. BOOKING_CONFIRMED:onboarding"
+    - Exempel: "Absolut! Låt oss boka en tid. BOOKING_CONFIRMED:onboarding"
     
     PRISER (alltid inkludera när användaren frågar):
     • Webbplats: 8,995 kr start + 495 kr/mån
@@ -77,12 +78,20 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - Never use markdown formatting (**, *, etc.)
     
     BOOKING MANAGEMENT:
-    When user wants to book something:
-    - Identify service: "BOOKING_SUGGEST:service-type"
-    - On confirmation: "BOOKING_CONFIRMED:service-type"
+    When user wants to book something or says "book", "yes", "sure":
+    - ALWAYS add BOOKING_CONFIRMED:service-type at the end of your response
     - Service types: onboarding, website, booking-system, app-development, complete-service
+    - Example: "Perfect! I'll open the booking calendar for you. BOOKING_CONFIRMED:onboarding"
     
     PRICING (always include when user asks):
+    // Check for booking confirmation words (ja, yes, etc.) in context
+    const isBookingConfirmation = latestUserMessage?.role === 'user' && 
+      /^(ja|yes|boka|book|absolutely|definitely|sure|ok|okay|säkert|visst)$/i.test(latestUserMessage.content.trim());
+    
+    if (isBookingConfirmation) {
+      systemPrompt += `\n\nBOOKING CONFIRMATION DETECTED: User is confirming a booking. ALWAYS include BOOKING_CONFIRMED:onboarding at the end of your response.`;
+    }
+
     • Website: 8,995 SEK setup + 495 SEK/month
     • E-commerce: 10,995 SEK setup + 895 SEK/month
     • Booking System: 10,995 SEK setup + 995 SEK/month (MOST POPULAR)
@@ -107,8 +116,8 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
 
     // Enhanced booking detection
     const bookingKeywords = detectedLanguage === 'sv' 
-      ? ['boka', 'bokning', 'tid', 'träffa', 'konsultation', 'möte']
-      : ['book', 'booking', 'appointment', 'meeting', 'consultation', 'schedule'];
+      ? ['boka', 'bokning', 'tid', 'träffa', 'konsultation', 'möte', 'book', 'booking']
+      : ['book', 'booking', 'appointment', 'meeting', 'consultation', 'schedule', 'boka', 'bokning'];
     
     const hasBookingIntent = latestUserMessage?.role === 'user' && 
       bookingKeywords.some(keyword => latestUserMessage.content.toLowerCase().includes(keyword));
@@ -128,7 +137,7 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
         serviceType = 'complete-service';
       }
       
-      systemPrompt += `\n\nBOOKING DETECTED: User wants to book ${serviceType}. Use BOOKING_CONFIRMED:${serviceType} in your response.`;
+      systemPrompt += `\n\nBOOKING DETECTED: User wants to book ${serviceType}. ALWAYS include BOOKING_CONFIRMED:${serviceType} at the end of your response to trigger the booking modal.`;
     }
 
     // Price inquiry detection

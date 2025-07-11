@@ -219,6 +219,7 @@ export function useChat() {
       const bookingMatch = response.match(/BOOKING_CONFIRMED:(\w+)/);
       if (bookingMatch) {
         const serviceType = bookingMatch[1];
+        console.log(`🎯 BOOKING MODAL TRIGGER: ${serviceType}`);
         return { hasBookingIntent: true, serviceType, response };
       }
 

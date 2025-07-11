@@ -29,34 +29,6 @@ const Chatbot = () => {
     const messageContent = input.trim();
     setInput('');
 
-    // Check if user is confirming a booking
-    const isBookingConfirmation = /^(ja|yes|boka|book|absolutely|definitely|sure|ok|okay)$/i.test(messageContent.trim());
-    
-    // If it's a booking confirmation and we have a suggested service, convert to booking intent
-    if (isBookingConfirmation && messages.length > 0) {
-      const lastAssistantMessage = messages.slice().reverse().find(m => m.role === 'assistant');
-      if (lastAssistantMessage?.content.includes('BOOKING_SUGGEST:')) {
-        const suggestMatch = lastAssistantMessage.content.match(/BOOKING_SUGGEST:(\w+)/);
-        if (suggestMatch) {
-          const serviceType = suggestMatch[1];
-          // Add the confirmation message with booking intent
-          const confirmationMessage = `${messageContent} BOOKING_CONFIRMED:${serviceType}`;
-          
-          try {
-            const result = await sendMessage(confirmationMessage);
-            if (result?.hasBookingIntent && result?.serviceType) {
-              setDetectedService(result.serviceType);
-              setTimeout(() => {
-                setShowBooking(true);
-              }, 500);
-            }
-          } catch (error) {
-            console.error('Error sending confirmation message:', error);
-          }
-          return;
-        }
-      }
-    }
     try {
       const result = await sendMessage(messageContent);
       
@@ -68,15 +40,16 @@ const Chatbot = () => {
       
       if (result?.hasBookingIntent && result?.serviceType) {
         setDetectedService(result.serviceType);
+        console.log(`🎯 OPENING BOOKING MODAL: ${result.serviceType}`);
         setTimeout(() => {
           setShowBooking(true);
-        }, 500);
+        }, 300); // Give time for message to appear first
       }
     } catch (error) {
       console.error('Error sending message:', error);
       // Don't show error to user - the useChat hook handles it gracefully
     }
-  }, [input, isLoading, sendMessage]);
+  }, [input, isLoading, sendMessage, messages]);
 
   const formatTime = useCallback((date: Date) => {
     return date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
