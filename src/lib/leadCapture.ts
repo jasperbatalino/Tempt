@@ -212,10 +212,10 @@ class LeadCaptureService {
       
       // Always save to database regardless of webhook status
       try {
-        await this.saveToTextFile(leadData);
-        console.log('✅ Lead saved to text file');
+        await this.saveToReceiptFile(leadData, language);
+        console.log('✅ Receipt saved to file');
       } catch (fileError) {
-        console.error('❌ Text file save failed:', fileError);
+        console.error('❌ Receipt file save failed:', fileError);
         // Continue even if file save fails
       }
 
@@ -254,66 +254,161 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToTextFile(leadData: LeadData): Promise<void> {
+  private async saveToReceiptFile(leadData: LeadData, language: 'sv' | 'en'): Promise<void> {
     try {
-      // Create lead entry for text file
-      const leadEntry = {
-        timestamp: leadData.timestamp,
-        email: leadData.email || 'N/A',
-        phone: leadData.phone || 'N/A',
-        context: leadData.context,
-        source: leadData.source,
-        sessionId: leadData.sessionId || 'N/A'
-      };
-
-      // Format as readable text
-      const textEntry = `
-=====================================
-LEAD CAPTURED: ${new Date(leadData.timestamp).toLocaleString('sv-SE')}
-=====================================
-Email: ${leadEntry.email}
-Phone: ${leadEntry.phone}
-Context: ${leadEntry.context}
-Source: ${leadEntry.source}
-Session ID: ${leadEntry.sessionId}
-Timestamp: ${leadEntry.timestamp}
-=====================================
-
-`;
+      // Create receipt content based on language
+      const receiptContent = this.generateReceiptContent(leadData, language);
 
       // In a real environment, this would write to a server file
       // For now, we'll log it and store in localStorage as backup
-      console.log('📧 LEAD CAPTURED - SAVING TO FILE:', textEntry);
+      console.log('🧾 RECEIPT GENERATED - SAVING TO FILE:', receiptContent);
       
       // Store in localStorage as backup (since we can't write files in browser)
-      const existingLeads = localStorage.getItem('axie-leads') || '';
-      localStorage.setItem('axie-leads', existingLeads + textEntry);
+      const existingReceipts = localStorage.getItem('axie-receipts') || '';
+      localStorage.setItem('axie-receipts', existingReceipts + receiptContent);
       
       // Also download as file for immediate access
-      this.downloadLeadFile(textEntry);
+      this.downloadReceiptFile(receiptContent, language);
       
     } catch (error) {
-      console.error('Error saving to text file:', error);
+      console.error('Error saving receipt file:', error);
       throw error;
     }
   }
 
-  // Download lead information as text file
-  private downloadLeadFile(leadContent: string): void {
+  // Generate receipt content based on language
+  private generateReceiptContent(leadData: LeadData, language: 'sv' | 'en'): string {
+    const date = new Date(leadData.timestamp);
+    const formattedDate = language === 'sv' 
+      ? date.toLocaleString('sv-SE')
+      : date.toLocaleString('en-US');
+
+    if (language === 'sv') {
+      return `
+╔══════════════════════════════════════════════════════════════╗
+║                        AXIE STUDIO                           ║
+║                   KONTAKTBEKRÄFTELSE                         ║
+╚══════════════════════════════════════════════════════════════╝
+
+📅 Datum: ${formattedDate}
+
+Hej!
+
+Vi har fått din information och kommer att kontakta dig snart! 
+Genom att använda vårt system godkänner du att vi behandlar din 
+information för att kontakta dig.
+
+═══════════════════════════════════════════════════════════════
+                      KONTAKTINFORMATION                       
+═══════════════════════════════════════════════════════════════
+
+📧 E-post:        ${leadData.email || 'Ej angiven'}
+📱 Telefon:       ${leadData.phone || 'Ej angiven'}
+💬 Meddelande:    ${leadData.context}
+🌐 Källa:         ${leadData.source}
+🆔 Session ID:    ${leadData.sessionId || 'N/A'}
+⏰ Tidsstämpel:   ${leadData.timestamp}
+
+═══════════════════════════════════════════════════════════════
+                         NÄSTA STEG                           
+═══════════════════════════════════════════════════════════════
+
+✅ Din förfrågan har registrerats
+✅ Vi kontaktar dig inom 2 timmar
+✅ Kostnadsfri konsultation över kaffe ☕
+✅ Skräddarsydd lösning för ditt företag
+
+═══════════════════════════════════════════════════════════════
+                      KONTAKTA OSS DIREKT                     
+═══════════════════════════════════════════════════════════════
+
+📧 E-post:    stefan@axiestudio.se
+📞 Telefon:   +46 735 132 620
+🌐 Hemsida:   axiestudio.se
+📍 Plats:     Jönköping, Sverige
+
+Tack för att du valde Axie Studio!
+
+Med vänliga hälsningar,
+Stefan & Axie Studio Team
+
+═══════════════════════════════════════════════════════════════
+
+`;
+    } else {
+      return `
+╔══════════════════════════════════════════════════════════════╗
+║                        AXIE STUDIO                           ║
+║                   CONTACT CONFIRMATION                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+📅 Date: ${formattedDate}
+
+Hello!
+
+We have received your information and will contact you soon! 
+By using our system, you agree that we process your information 
+to contact you.
+
+═══════════════════════════════════════════════════════════════
+                      CONTACT INFORMATION                      
+═══════════════════════════════════════════════════════════════
+
+📧 Email:         ${leadData.email || 'Not provided'}
+📱 Phone:         ${leadData.phone || 'Not provided'}
+💬 Message:       ${leadData.context}
+🌐 Source:        ${leadData.source}
+🆔 Session ID:    ${leadData.sessionId || 'N/A'}
+⏰ Timestamp:     ${leadData.timestamp}
+
+═══════════════════════════════════════════════════════════════
+                         NEXT STEPS                           
+═══════════════════════════════════════════════════════════════
+
+✅ Your request has been registered
+✅ We will contact you within 2 hours
+✅ Free consultation over coffee ☕
+✅ Tailored solution for your business
+
+═══════════════════════════════════════════════════════════════
+                      CONTACT US DIRECTLY                     
+═══════════════════════════════════════════════════════════════
+
+📧 Email:     stefan@axiestudio.se
+📞 Phone:     +46 735 132 620
+🌐 Website:   axiestudio.se
+📍 Location:  Jönköping, Sweden
+
+Thank you for choosing Axie Studio!
+
+Best regards,
+Stefan & Axie Studio Team
+
+═══════════════════════════════════════════════════════════════
+
+`;
+    }
+  }
+
+  // Download receipt as text file
+  private downloadReceiptFile(receiptContent: string, language: 'sv' | 'en'): void {
     try {
-      const blob = new Blob([leadContent], { type: 'text/plain' });
+      const blob = new Blob([receiptContent], { type: 'text/plain; charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `axie-lead-${new Date().toISOString().split('T')[0]}-${Date.now()}.txt`;
+      
+      const prefix = language === 'sv' ? 'axie-kvitto' : 'axie-receipt';
+      link.download = `${prefix}-${new Date().toISOString().split('T')[0]}-${Date.now()}.txt`;
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log('✅ Lead file downloaded successfully');
+      console.log('✅ Receipt file downloaded successfully');
     } catch (error) {
-      console.error('Error downloading lead file:', error);
+      console.error('Error downloading receipt file:', error);
     }
   }
 }
