@@ -7,9 +7,6 @@ interface LeadData {
   source: string;
   sessionId?: string;
   timestamp: string;
-  language?: 'sv' | 'en';
-  userAgent?: string;
-  referrer?: string;
 }
 
 interface WebhookResponse {
@@ -62,65 +59,30 @@ class LeadCaptureService {
   detectContactIntent(message: string, language: 'sv' | 'en'): boolean {
     const lowerMessage = message.toLowerCase();
     
-    console.log(`🔍 CONTACT INTENT DEBUG - Language: ${language}, Message: "${lowerMessage}"`);
-    
-    // Enhanced Swedish triggers
     const swedishTriggers = [
-      // Direct contact requests
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
-      'kontakta mig senare', 'ring mig senare', 'mejla mig senare',
-      'kan du mejla mig', 'kan ni kontakta mig', 'kan du ringa mig',
-      'contact me', 'email me', 'call me', // English in Swedish context
-      // Email/phone sharing
-      'min email', 'min e-post', 'mitt mail', 'mitt telefonnummer', 'min telefon',
-      'nå mig', 'återkoppla', 'genom', 'på', 'via',
-      'my email', 'my phone', // English phrases
-      // Business context
+      'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
-      'kan du kontakta', 'kontakta mig genom', 'kan ni kontakta',
-      'book', 'consultation', 'meet', 'discuss', // English equivalents
-      // Email patterns
-      '@', '.se', '.com', '.nu', '.org'
+      'kan du kontakta', 'kontakta mig genom', 'min e-post', 'mitt mail'
     ];
 
-    // Enhanced English triggers
     const englishTriggers = [
-      // Primary contact triggers
       'contact me', 'call me', 'email me', 'reach out', 'get in touch',
-      'reach me', 'follow up', 'get back to me', 'contact me later',
-      'call me later', 'email me later', 'reach me later',
-      'can you email me', 'can you contact me', 'can you call me',
-      'kontakta mig', 'ring mig', 'mejla mig', // Swedish in English context
-      
-      // Email/phone sharing
-      'my email', 'my phone', 'my email is', 'email is', 'here is my email',
-      'you can reach me', 'you can contact me', 'you can email me',
-      'here is my contact', 'my contact is', 'reach me at',
-      'min email', 'mitt mail', // Swedish phrases
-      
-      // Contact at specific address
-      'contact me at', 'reach me at', 'email me at', 'get back to me at',
-      'contact me on', 'reach me on', 'get in touch at',
-      
-      // Business triggers
+      'my email', 'my phone', 'reach me', 'follow up', 'get back to me', 'through',
       'book appointment', 'consultation', 'meet', 'discuss more',
       'quote', 'pricing', 'more information', 'want to know more',
-      'boka tid', 'konsultation', 'träffa', // Swedish equivalents
-      
-      // Specific patterns that should trigger
-      'can you contact', 'contact me through', 'reach out at', 'call me at',
-      
-      // Email patterns
-      '@', '.com', '.org', '.net', '.se'
+      'can you contact', 'contact me through', 'my email is', 'email is',
+      'here is my email', 'you can reach me', 'contact me at', 'reach me at',
+      'send me', 'email me at', 'my contact', 'get back to me at',
+      'contact me later', 'reach me later', 'get back to me later',
+      'contact me at', 'reach out at', 'email me later', 'call me at',
+      'you can contact me', 'you can reach me', 'you can email me',
+      'contact me on', 'reach me on', 'get in touch at'
     ];
 
     const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
-    
-    const hasContactIntent = triggers.some(trigger => lowerMessage.includes(trigger));
-    console.log(`🎯 CONTACT INTENT RESULT: ${hasContactIntent} (triggers checked: ${triggers.length})`);
-    
-    return hasContactIntent;
+    return triggers.some(trigger => lowerMessage.includes(trigger));
   }
 
   // Send lead data to N8N webhooks using GET method with URL parameters
@@ -131,7 +93,7 @@ class LeadCaptureService {
       const url = this.webhookUrls[i];
       
       try {
-        console.log(`📡 Webhook ${i + 1}/${this.webhookUrls.length}: ${url}`);
+        console.log(`Attempting webhook ${i + 1}/${this.webhookUrls.length}: ${url}`);
         
         // Build URL parameters for GET request
         const params = new URLSearchParams();
@@ -139,14 +101,8 @@ class LeadCaptureService {
         if (leadData.phone) params.append('phone', leadData.phone);
         params.append('context', leadData.context);
         params.append('source', leadData.source);
-        if (leadData.sessionId) {
-          params.append('sessionId', leadData.sessionId);
-          params.append('chatId', leadData.sessionId); // For Telegram integration
-        }
+        if (leadData.sessionId) params.append('sessionId', leadData.sessionId);
         params.append('timestamp', leadData.timestamp);
-        params.append('language', leadData.language || 'sv');
-        params.append('userAgent', navigator.userAgent);
-        params.append('referrer', document.referrer || 'direct');
         
         const fullUrl = `${url}?${params.toString()}`;
         
@@ -155,8 +111,6 @@ class LeadCaptureService {
           method: 'GET',
           headers: {
             'Accept': 'text/plain, application/json, */*',
-            'X-Axie-Source': 'chatbot',
-            'X-Axie-Version': '2.0',
           },
         });
 
@@ -256,10 +210,7 @@ class LeadCaptureService {
         context: message,
         source: 'chat',
         sessionId,
-        timestamp: new Date().toISOString(),
-        language,
-        userAgent: navigator.userAgent,
-        referrer: document.referrer || 'direct'
+        timestamp: new Date().toISOString()
       };
 
       // Try to send to webhooks, but don't fail if they're down
@@ -362,10 +313,7 @@ information för att kontakta dig.
 💬 Meddelande:    ${leadData.context}
 🌐 Källa:         ${leadData.source}
 🆔 Session ID:    ${leadData.sessionId || 'N/A'}
-🗣️ Språk:         ${leadData.language || 'sv'}
 ⏰ Tidsstämpel:   ${leadData.timestamp}
-🌐 Webbläsare:    ${leadData.userAgent || 'N/A'}
-🔗 Referrer:      ${leadData.referrer || 'Direkt besök'}
 
 ═══════════════════════════════════════════════════════════════
                          NÄSTA STEG                           
@@ -417,10 +365,7 @@ to contact you.
 💬 Message:       ${leadData.context}
 🌐 Source:        ${leadData.source}
 🆔 Session ID:    ${leadData.sessionId || 'N/A'}
-🗣️ Language:      ${leadData.language || 'en'}
 ⏰ Timestamp:     ${leadData.timestamp}
-🌐 Browser:       ${leadData.userAgent || 'N/A'}
-🔗 Referrer:      ${leadData.referrer || 'Direct visit'}
 
 ═══════════════════════════════════════════════════════════════
                          NEXT STEPS                           

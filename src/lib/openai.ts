@@ -16,22 +16,10 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     // Get the latest user message
     const latestUserMessage = messages[messages.length - 1];
     
-    // Enhanced language detection - look at conversation context
-    let detectedLanguage: 'sv' | 'en' = 'sv';
-    if (latestUserMessage?.role === 'user') {
-      detectedLanguage = knowledgeBase.detectLanguage(latestUserMessage.content);
-      
-      // Check previous messages for language consistency
-      const recentUserMessages = messages.slice(-3).filter(m => m.role === 'user');
-      if (recentUserMessages.length > 1) {
-        const languageVotes = recentUserMessages.map(m => knowledgeBase.detectLanguage(m.content));
-        const englishCount = languageVotes.filter(l => l === 'en').length;
-        const swedishCount = languageVotes.filter(l => l === 'sv').length;
-        
-        // Use majority language from recent conversation
-        detectedLanguage = englishCount > swedishCount ? 'en' : 'sv';
-      }
-    }
+    // Detect language
+    const detectedLanguage = latestUserMessage?.role === 'user' 
+      ? knowledgeBase.detectLanguage(latestUserMessage.content)
+      : 'sv';
     
     // Security check
     if (latestUserMessage?.role === 'user') {
@@ -43,133 +31,72 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       }
     }
     
-    // Enhanced system prompt with better multilingual handling
+    // Check if we need specific information
     let systemPrompt = detectedLanguage === 'sv' 
-      ? `Du är Axie, en professionell AI-assistent för Axie Studio. Du hjälper användare på svenska med våra digitala lösningar.
+      ? `Du är en professionell AI-assistent för Axie Studio som hjälper användare på svenska. 
+    Du är vänlig, hjälpsam och ger alltid svar på svenska.
     
-    SPRÅKHANTERING:
-    - Svara ALLTID på svenska, även om användaren byter till engelska
-    - Var naturlig och vänlig i din kommunikation
-    - Använd aldrig markdown-formatering (**, *, etc.)
+    När användaren vill boka något, identifiera vilken tjänst de är intresserade av och svara med:
+    - "BOOKING_SUGGEST:onboarding" för allmän konsultation eller onboarding
+    - "BOOKING_SUGGEST:website" för hemsidor eller webbdesign
+    - "BOOKING_SUGGEST:booking-system" för bokningssystem
+    - "BOOKING_SUGGEST:app-development" för apputveckling
+    - "BOOKING_SUGGEST:complete-service" för kompletta lösningar
     
-    BOKNINGSHANTERING:
-    När användaren vill boka något eller säger "boka tid", "ja", "visst":
-    - ALLTID lägg till BOOKING_CONFIRMED:service-type i slutet av ditt svar
-    - Tjänsttyper: onboarding, website, booking-system, app-development, complete-service
-    - Exempel: "Perfekt! Jag öppnar bokningskalendern för dig. BOOKING_CONFIRMED:onboarding"
-    - Exempel: "Absolut! Låt oss boka en tid. BOOKING_CONFIRMED:onboarding"
+    När användaren bekräftar att de vill boka, använd då:
+    - "BOOKING_CONFIRMED:service-type" för att öppna bokningsmodalen
     
-    PRISER (alltid inkludera när användaren frågar):
-    • Webbplats: 8,995 kr start + 495 kr/mån
-    • E-handel: 10,995 kr start + 895 kr/mån  
-    • Bokningssystem: 10,995 kr start + 995 kr/mån (MEST POPULÄR)
-    • Komplett paket: 14,995 kr start + 1,495 kr/mån (BÄST VÄRDE)
-    • Alla priser exkl. moms, inga bindningstider
+    VIKTIGT: 
+    - Fråga alltid om användaren vill boka innan du öppna bokningsmodalen
+    - Använd ALDRIG markdown-formatering som **, *, eller andra symboler i dina svar
+    - När du använder BOOKING_CONFIRMED, inkludera INTE denna text i det synliga svaret till användaren
+    - Ge alltid rena, professionella svar utan formatering
+    - Exempel: "Vill du boka en kostnadsfri konsultation för [tjänst]?"
     
-    KONTAKTHANTERING:
-    - Lead capture-systemet hanterar automatiskt e-post/telefon
-    - Fokusera på att ge värdefull information om våra tjänster
-    - Vid kontaktförfrågningar, be om e-post/telefon för uppföljning`
-      : `You are Axie, a professional AI assistant for Axie Studio. You help users in English with our digital solutions.
+    Följ alltid med ett vänligt meddelande efter BOOKING_SUGGEST.`
+      : `You are a professional AI assistant for Axie Studio helping users in English.
+    You are friendly, helpful and always respond in English.
     
-    LANGUAGE HANDLING:
-    - ALWAYS respond in English, even if user switches to Swedish
-    - Be natural and friendly in your communication
-    - Never use markdown formatting (**, *, etc.)
+    When the user wants to book something, identify which service they are interested in and respond with:
+    - "BOOKING_SUGGEST:onboarding" for general consultation or onboarding
+    - "BOOKING_SUGGEST:website" for websites or web design
+    - "BOOKING_SUGGEST:booking-system" for booking systems
+    - "BOOKING_SUGGEST:app-development" for app development
+    - "BOOKING_SUGGEST:complete-service" for complete solutions
     
-    BOOKING MANAGEMENT:
-    When user wants to book something or says "book", "yes", "sure":
-    - ALWAYS add BOOKING_CONFIRMED:service-type at the end of your response
-    - Service types: onboarding, website, booking-system, app-development, complete-service
-    - Example: "Perfect! I'll open the booking calendar for you. BOOKING_CONFIRMED:onboarding"
+    When the user confirms they want to book, then use:
+    - "BOOKING_CONFIRMED:service-type" to open the booking modal
     
-    PRICING (always include when user asks):
-    // Check for booking confirmation words (ja, yes, etc.) in context
-    const isBookingConfirmation = latestUserMessage?.role === 'user' && 
-      /^(ja|yes|boka|book|absolutely|definitely|sure|ok|okay|säkert|visst)$/i.test(latestUserMessage.content.trim());
+    IMPORTANT:
+    - Always ask if the user wants to book before opening the booking modal
+    - NEVER use markdown formatting like **, *, or other symbols in your responses
+    - When using BOOKING_CONFIRMED, do NOT include this text in the visible response to the user
+    - Always provide clean, professional responses without formatting
+    - Example: "Would you like to book a free consultation for [service]?"
+    - DO NOT say you cannot contact users directly - the lead capture system handles this automatically
+    - Focus on providing helpful information about Axie Studio services
     
-    if (isBookingConfirmation) {
-      systemPrompt += `\n\nBOOKING CONFIRMATION DETECTED: User is confirming a booking. ALWAYS include BOOKING_CONFIRMED:onboarding at the end of your response.`;
-    }
-    • Website: 8,995 SEK setup + 495 SEK/month
-    • E-commerce: 10,995 SEK setup + 895 SEK/month
-    • Booking System: 10,995 SEK setup + 995 SEK/month (MOST POPULAR)
-    • Complete Package: 14,995 SEK setup + 1,495 SEK/month (BEST VALUE)
-    • All prices exclude VAT, no binding contracts
-    
-    CONTACT HANDLING:
-    - Lead capture system automatically handles email/phone
-    - Focus on providing valuable information about our services
-    - For contact requests, ask for email/phone for follow-up`;
-
-    // Add relevant context based on conversation
-    if (latestUserMessage?.role === 'user') {
-      const needsInfo = knowledgeBase.needsSpecificInformation(latestUserMessage.content, detectedLanguage);
-      if (needsInfo) {
-        const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content, detectedLanguage);
-        if (relevantContext) {
-          systemPrompt += `\n\nRELEVANT INFORMATION:\n${relevantContext}`;
-        }
+    Always follow with a friendly message after BOOKING_SUGGEST.`;
+    // Add relevant context if needed
+    if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content, detectedLanguage)) {
+      const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content, detectedLanguage);
+      if (relevantContext) {
+        systemPrompt += `\n\nRELEVANT COMPANY INFORMATION:\n${relevantContext}`;
       }
     }
 
-    // Enhanced booking detection
-    const bookingKeywords = detectedLanguage === 'sv' 
-      ? ['boka', 'bokning', 'tid', 'träffa', 'konsultation', 'möte', 'book', 'booking']
-      : ['book', 'booking', 'appointment', 'meeting', 'consultation', 'schedule', 'boka', 'bokning'];
-    
-    const hasBookingIntent = latestUserMessage?.role === 'user' && 
-      bookingKeywords.some(keyword => latestUserMessage.content.toLowerCase().includes(keyword));
-    
-    if (hasBookingIntent) {
-      // Determine service type from conversation context
-      const content = latestUserMessage.content.toLowerCase();
-      let serviceType = 'onboarding'; // default
-      
-      if (content.includes('website') || content.includes('hemsida') || content.includes('webbplats')) {
-        serviceType = 'website';
-      } else if (content.includes('app') || content.includes('mobilapp')) {
-        serviceType = 'app-development';
-      } else if (content.includes('booking') || content.includes('bokning')) {
-        serviceType = 'booking-system';
-      } else if (content.includes('complete') || content.includes('komplett') || content.includes('everything')) {
-        serviceType = 'complete-service';
-      }
-      
-      systemPrompt += `\n\nBOOKING DETECTED: User wants to book ${serviceType}. ALWAYS include BOOKING_CONFIRMED:${serviceType} at the end of your response to trigger the booking modal.`;
-    }
+    // Add lead capture instructions
+    systemPrompt += `\n\nLEAD CAPTURE INSTRUCTIONS:
+    - If user provides email or phone number and wants contact, the system will automatically handle lead capture
+    - Don't ask for contact information yourself - the lead capture system handles this
+    - Focus on providing helpful information about Axie Studio services
+    - If user asks about contact, mention they can reach Stefan at stefan@axiestudio.se or +46 735 132 620`;
 
-    // Price inquiry detection
-    const priceKeywords = detectedLanguage === 'sv' 
-      ? ['pris', 'kostnad', 'kostar', 'betala', 'avgift']
-      : ['price', 'cost', 'pricing', 'how much', 'fee', 'charge'];
-    
-    const hasPriceInquiry = latestUserMessage?.role === 'user' && 
-      priceKeywords.some(keyword => latestUserMessage.content.toLowerCase().includes(keyword));
-    
-    if (hasPriceInquiry) {
-      systemPrompt += `\n\nPRICE INQUIRY DETECTED: User is asking about pricing. Include detailed pricing information in your response.`;
-    }
-
-    // Contact intent detection
-    const contactKeywords = detectedLanguage === 'sv' 
-      ? ['kontakta', 'ring', 'mejla', 'hör av', 'email', 'telefon', '@']
-      : ['contact', 'email', 'call', 'reach', 'get back', '@'];
-    
-    const hasContactIntent = latestUserMessage?.role === 'user' && 
-      contactKeywords.some(keyword => latestUserMessage.content.toLowerCase().includes(keyword));
-    
-    if (hasContactIntent) {
-      systemPrompt += `\n\nCONTACT INTENT DETECTED: User wants to be contacted. The lead capture system will handle this automatically.`;
-    }
-
-    // Add context security
+    // Always include context security guidelines
     const contextSecurity = knowledgeBase.getContextSecurity();
     if (contextSecurity) {
-      systemPrompt += `\n\nCONTEXT GUIDELINES:\n${contextSecurity}`;
+      systemPrompt += `\n\nCONTEXT SECURITY GUIDELINES:\n${contextSecurity}`;
     }
-
-    console.log(`🤖 AI SYSTEM - Language: ${detectedLanguage}, Booking: ${hasBookingIntent}, Price: ${hasPriceInquiry}, Contact: ${hasContactIntent}`);
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -184,15 +111,7 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       temperature: 0.7,
     });
 
-    let response = completion.choices[0]?.message?.content || 'Ursäkta, jag kunde inte generera ett svar.';
-    
-    // Clean up response - remove any booking tags from visible text
-    const cleanResponse = response
-      .replace(/BOOKING_CONFIRMED:\w+/g, '')
-      .replace(/BOOKING_SUGGEST:\w+/g, '')
-      .trim();
-
-    return cleanResponse || response;
+    return completion.choices[0]?.message?.content || 'Ursäkta, jag kunde inte generera ett svar.';
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Kunde inte ansluta till AI-tjänsten');

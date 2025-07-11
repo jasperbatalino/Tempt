@@ -29,6 +29,34 @@ const Chatbot = () => {
     const messageContent = input.trim();
     setInput('');
 
+    // Check if user is confirming a booking
+    const isBookingConfirmation = /^(ja|yes|boka|book|absolutely|definitely|sure|ok|okay)$/i.test(messageContent.trim());
+    
+    // If it's a booking confirmation and we have a suggested service, convert to booking intent
+    if (isBookingConfirmation && messages.length > 0) {
+      const lastAssistantMessage = messages.slice().reverse().find(m => m.role === 'assistant');
+      if (lastAssistantMessage?.content.includes('BOOKING_SUGGEST:')) {
+        const suggestMatch = lastAssistantMessage.content.match(/BOOKING_SUGGEST:(\w+)/);
+        if (suggestMatch) {
+          const serviceType = suggestMatch[1];
+          // Add the confirmation message with booking intent
+          const confirmationMessage = `${messageContent} BOOKING_CONFIRMED:${serviceType}`;
+          
+          try {
+            const result = await sendMessage(confirmationMessage);
+            if (result?.hasBookingIntent && result?.serviceType) {
+              setDetectedService(result.serviceType);
+              setTimeout(() => {
+                setShowBooking(true);
+              }, 500);
+            }
+          } catch (error) {
+            console.error('Error sending confirmation message:', error);
+          }
+          return;
+        }
+      }
+    }
     try {
       const result = await sendMessage(messageContent);
       
@@ -40,16 +68,15 @@ const Chatbot = () => {
       
       if (result?.hasBookingIntent && result?.serviceType) {
         setDetectedService(result.serviceType);
-        console.log(`🎯 OPENING BOOKING MODAL: ${result.serviceType}`);
         setTimeout(() => {
           setShowBooking(true);
-        }, 300); // Give time for message to appear first
+        }, 500);
       }
     } catch (error) {
       console.error('Error sending message:', error);
       // Don't show error to user - the useChat hook handles it gracefully
     }
-  }, [input, isLoading, sendMessage, messages]);
+  }, [input, isLoading, sendMessage]);
 
   const formatTime = useCallback((date: Date) => {
     return date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
@@ -79,10 +106,7 @@ const Chatbot = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Axie</h1>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <p className="text-sm text-gray-500">Online • Axie Studios AI</p>
-            </div>
+            <p className="text-sm text-gray-500">Axie Studios AI</p>
           </div>
         </div>
       </div>
@@ -124,9 +148,9 @@ const Chatbot = () => {
               <div className="flex items-center space-x-2">
                 {msg.isLoading && (
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 )}
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -158,19 +182,13 @@ const Chatbot = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={messages.length <= 1 ? "Hej! Hur kan jag hjälpa dig idag? 👋" : "Skriv ditt meddelande..."}
+              placeholder="Skriv ditt meddelande..."
               className={`w-full px-4 py-3 pr-12 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
                 isLoading 
                   ? 'bg-gray-100 border border-gray-300 text-gray-500' 
                   : 'bg-gray-50 border border-gray-200'
               }`}
               disabled={isLoading}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e as any);
-                }
-              }}
             />
             {isLoading && (
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2">

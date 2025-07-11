@@ -104,40 +104,18 @@ class KnowledgeBase {
   detectLanguage(message: string): 'sv' | 'en' {
     const lowerMessage = message.toLowerCase();
     
-    // Enhanced Swedish indicators
+    // Swedish indicators
     const swedishWords = [
-      // Greetings & common words
-      'hej', 'tack', 'tjena', 'hallå', 'morsning',
-      // Grammar words
-      'och', 'är', 'för', 'med', 'på', 'av', 'till', 'från', 'som', 'det', 'att', 'en', 'ett',
-      // Question words
-      'vad', 'hur', 'när', 'var', 'varför', 'vilken', 'vilket',
-      // Modal verbs
-      'kan', 'vill', 'ska', 'skulle', 'måste', 'bör',
-      // Business terms
-      'tjänst', 'företag', 'pris', 'kostnad', 'hemsida', 'bokning', 'webbplats',
-      // Swedish specific
-      'också', 'kanske', 'alltså', 'eller', 'bara', 'inte', 'mycket', 'lite',
-      // Actions
-      'boka', 'kontakta', 'mejla', 'ring', 'träffa', 'diskutera'
+      'hej', 'tack', 'och', 'är', 'för', 'med', 'på', 'av', 'till', 'från',
+      'vad', 'hur', 'när', 'var', 'varför', 'kan', 'vill', 'ska', 'skulle',
+      'tjänst', 'företag', 'pris', 'kostnad', 'hemsida', 'bokning'
     ];
     
-    // Enhanced English indicators  
+    // English indicators
     const englishWords = [
-      // Greetings & common words
-      'hello', 'hi', 'hey', 'thank', 'thanks', 'please',
-      // Grammar words
-      'and', 'the', 'for', 'with', 'from', 'to', 'of', 'in', 'on', 'at', 'by', 'is', 'are', 'was', 'were',
-      // Question words
-      'what', 'how', 'when', 'where', 'why', 'which', 'who',
-      // Modal verbs
-      'can', 'will', 'would', 'should', 'could', 'must', 'might',
-      // Business terms
-      'service', 'company', 'price', 'cost', 'website', 'booking', 'development',
-      // English specific
-      'also', 'maybe', 'just', 'only', 'very', 'much', 'little', 'about',
-      // Actions
-      'book', 'contact', 'email', 'call', 'meet', 'discuss', 'help'
+      'hello', 'hi', 'thank', 'thanks', 'and', 'the', 'for', 'with', 'from', 'to',
+      'what', 'how', 'when', 'where', 'why', 'can', 'will', 'would', 'should',
+      'service', 'company', 'price', 'cost', 'website', 'booking'
     ];
 
     let swedishScore = 0;
@@ -151,10 +129,8 @@ class KnowledgeBase {
       if (lowerMessage.includes(word)) englishScore++;
     });
 
-    console.log(`🌍 LANGUAGE DETECTION - Swedish: ${swedishScore}, English: ${englishScore}, Message: "${lowerMessage}"`);
-    
-    // Need clear majority for English, otherwise default to Swedish
-    return englishScore > (swedishScore + 1) ? 'en' : 'sv';
+    // Default to Swedish if no clear indicators
+    return englishScore > swedishScore ? 'en' : 'sv';
   }
 
   needsSpecificInformation(message: string, language: 'sv' | 'en'): boolean {
