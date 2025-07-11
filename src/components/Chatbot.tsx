@@ -28,29 +28,29 @@ const Chatbot = () => {
 
     const messageContent = input.trim();
     setInput('');
-
-    // Check if user is confirming a booking
-    const isBookingConfirmation = /^(ja|yes|boka|book|absolutely|definitely|sure|ok|okay)$/i.test(messageContent.trim());
-    
     
     try {
       const result = await sendMessage(messageContent);
+      console.log('📋 Send message result:', result);
       
-      // Check for lead capture confirmation
-      if (result?.leadCaptured) {
-        // Lead confirmation is now handled in the chat message itself
-        // No modal needed as per user request
-      }
-      
-      if (result?.hasBookingIntent && result?.serviceType) {
-        setDetectedService(result.serviceType);
+      // Check if response contains BOOKING_CONFIRMED
+      if (result?.response && result.response.includes('BOOKING_CONFIRMED:')) {
+        console.log('🎯 Booking confirmed detected!');
+        const match = result.response.match(/BOOKING_CONFIRMED:(\w+)/);
+        if (match) {
+          const serviceType = match[1];
+          console.log('📅 Service type:', serviceType);
+          setDetectedService(serviceType);
+        } else {
+          setDetectedService('onboarding');
+        }
         setTimeout(() => {
+          console.log('🚀 Opening booking modal...');
           setShowBooking(true);
         }, 500);
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Don't show error to user - the useChat hook handles it gracefully
     }
   }, [input, isLoading, sendMessage]);
 

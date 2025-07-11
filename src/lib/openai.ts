@@ -3,7 +3,7 @@ import { knowledgeBase } from './knowledgeBase';
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Note: In production, use a backend API
+  dangerouslyAllowBrowser: true
 });
 
 export interface ChatMessage {
@@ -13,11 +13,8 @@ export interface ChatMessage {
 
 export async function generateResponse(messages: ChatMessage[]): Promise<string> {
   try {
-    // Get the latest user message
     const latestUserMessage = messages[messages.length - 1];
-    
-    // Always use Swedish
-    const detectedLanguage = 'sv';
+    console.log('🔍 Processing message:', latestUserMessage?.content);
     
     // Security check
     if (latestUserMessage?.role === 'user') {
@@ -27,7 +24,16 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       }
     }
     
-    // Check if we need specific information
+    // Check for booking intent - SIMPLE AND DIRECT
+    const userMessage = latestUserMessage?.content?.toLowerCase() || '';
+    const isBookingRequest = userMessage.includes('boka') || 
+                           userMessage.includes('book') || 
+                           userMessage.includes('tid') ||
+                           userMessage.includes('konsultation') ||
+                           userMessage.includes('träffa');
+    
+    console.log('📅 Is booking request:', isBookingRequest);
+    
     let systemPrompt = `Du är Axie - den professionella AI-assistenten för Axie Studio! 🚀
     
     PERSONLIGHET & STIL:
@@ -47,39 +53,19 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - 14 dagar genomsnittlig leveranstid
     - 24/7 support - vi finns alltid här för dig
     
-    BOKNINGSLOGIK:
-    När användaren vill boka något, identifiera tjänsten och svara med:
-    - BOOKING_CONFIRMED:onboarding för allmän konsultation eller onboarding
-    - BOOKING_CONFIRMED:website för hemsidor eller webbdesign
-    - BOOKING_CONFIRMED:booking-system för bokningssystem
-    - BOOKING_CONFIRMED:app-development för apputveckling
-    - BOOKING_CONFIRMED:complete-service för kompletta lösningar
+    BOKNINGSLOGIK - VIKTIGT:
+    När användaren vill boka något, svara ALLTID med:
+    "BOOKING_CONFIRMED:onboarding [ditt vanliga svar här]"
     
-    När användaren säger "boka" → använd BOOKING_CONFIRMED:onboarding direkt för att öppna bokningsmodalen
+    EXEMPEL:
+    Användare: "boka"
+    Du: "BOOKING_CONFIRMED:onboarding Fantastiskt! 🚀 Jag öppnar bokningskalendern för dig nu så du kan välja en tid som passar! Vi erbjuder kostnadsfri konsultation över kaffe ☕ där vi lär känna dig och ditt företag. Välj en tid som passar dig bäst!"
     
     SVARSREGLER:
     - Använd emojis för att visa entusiasm och energi! 🚀💪⭐🎯✨
-    - BOOKING_CONFIRMED/BOOKING_SUGGEST ska ALDRIG synas för användaren
+    - BOOKING_CONFIRMED ska ALLTID vara i början av svaret när det gäller bokning
     - Ingen markdown-formatering - bara ren text med emojis
     - Fokusera på värde och fördelar, inte bara funktioner
-    
-    EXEMPEL PÅ BRA SVAR:
-    "Fantastiskt! 🚀 Axie Studio är #1 för digitala lösningar. Vi erbjuder professionella webbplatser från 8,995 kr + 495 kr/månad med 99.9% drifttid och kostnadsfri konsultation över kaffe! ☕ Vill du boka en tid?"`;
-    
-    // Add relevant context if needed
-    if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content)) {
-      const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content);
-      if (relevantContext) {
-        systemPrompt += `\n\nRELEVANT FÖRETAGSINFORMATION:\n${relevantContext}`;
-      }
-    }
-
-    // Add lead capture instructions
-    systemPrompt += `\n\nKONTAKTHANTERING:
-    - Lead capture-systemet hanterar automatiskt e-post och telefonnummer
-    - Fokusera på att ge värdefull information om Axie Studios tjänster
-    - Vid kontaktfrågor: nämn Stefan på stefan@axiestudio.se eller +46 735 132 620
-    - Betona alltid kostnadsfri konsultation över kaffe! ☕
     
     PRISINFORMATION - GE ALLTID SPECIFIKA PRISER:
     WEBBPLATS PAKET: 8,995 kr startavgift + 495 kr/månad
@@ -90,11 +76,17 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     + Kostnadsfri konsultation över kaffe ☕
     + Inga bindningstider - avsluta när som helst
     + 99.9% drifttid garanterat
-    + 24/7 support
+    + 24/7 support`;
     
-    När användaren frågar "hur mycket" eller "vad kostar" - GE ALLTID specifika priser! 💰`;
+    // Add relevant context if needed
+    if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content)) {
+      const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content);
+      if (relevantContext) {
+        systemPrompt += `\n\nRELEVANT FÖRETAGSINFORMATION:\n${relevantContext}`;
+      }
+    }
 
-    // Always include context security guidelines
+    // Add context security guidelines
     const contextSecurity = knowledgeBase.getContextSecurity();
     if (contextSecurity) {
       systemPrompt += `\n\nKONTEXTSÄKERHET:\n${contextSecurity}`;
@@ -113,7 +105,10 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       temperature: 0.7,
     });
 
-    return completion.choices[0]?.message?.content || 'Ursäkta, jag kunde inte generera ett svar.';
+    const response = completion.choices[0]?.message?.content || 'Ursäkta, jag kunde inte generera ett svar.';
+    console.log('🤖 AI Response:', response);
+    
+    return response;
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Kunde inte ansluta till AI-tjänsten');
