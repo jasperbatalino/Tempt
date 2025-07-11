@@ -59,6 +59,10 @@ export function useChat() {
   const sendMessage = useCallback(async (content: string) => {
     if (isLoading || !content.trim() || !sessionId) return;
 
+    // Detect language first
+    const detectedLanguage = content.includes('hej') || content.includes('tack') || content.includes('och') ? 'sv' : 'en';
+    console.log(`🌍 DETECTED LANGUAGE: ${detectedLanguage} for message: "${content}"`);
+
     setIsLoading(true);
 
     try {
@@ -78,7 +82,7 @@ export function useChat() {
       // Check for lead capture before generating AI response
       const leadResult = await leadCaptureService.processMessage(
         userMessage.content,
-        'sv',
+        detectedLanguage, // Use detected language instead of hardcoded 'sv'
         sessionId
       );
 
