@@ -97,7 +97,12 @@ export function useChat() {
         setMessages(prev => [...prev, leadConfirmationMessage]);
         await saveMessage(sessionId, 'assistant', leadConfirmationMessage.content);
         
-        return { hasBookingIntent: false, response: leadResult.response };
+        return { 
+          hasBookingIntent: false, 
+          response: leadResult.response,
+          leadCaptured: true,
+          n8nResponse: leadResult.n8nResponse
+        };
       }
 
       // If user wants contact but didn't provide info, ask for it

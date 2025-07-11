@@ -84,7 +84,7 @@ class LeadCaptureService {
   }
 
   // Send lead data to both N8N webhooks
-  async sendToWebhooks(leadData: LeadData): Promise<WebhookResponse> {
+  async sendToWebhooks(leadData: LeadData): Promise<WebhookResponse & { n8nResponse?: string }> {
     try {
       const webhookData = {
         email: leadData.email,
@@ -100,31 +100,56 @@ class LeadCaptureService {
       };
 
       // Send to both webhooks simultaneously
-      const webhookPromises = this.webhookUrls.map(async (url) => {
+      const webhookPromises = this.webhookUrls.map(async (url, index) => {
         console.log(`Sending lead to webhook: ${url}`);
-        const response = await fetch(url, {
-          method: 'POST',
+        
+        // Use GET request with URL parameters for N8N webhooks
+        const params = new URLSearchParams({
+          email: leadData.email || '',
+          phone: leadData.phone || '',
+          context: leadData.context,
+          source: leadData.source,
+          sessionId: leadData.sessionId || '',
+          timestamp: leadData.timestamp,
+          userAgent: navigator.userAgent,
+          referrer: document.referrer,
+          url: window.location.href
+        });
+
+        const response = await fetch(`${url}?${params.toString()}`, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(webhookData)
+            'Accept': 'application/json',
+          }
         });
 
         if (!response.ok) {
           console.error(`Webhook ${url} failed: ${response.status}`);
-          return { success: false, url, status: response.status };
+          return { success: false, url, status: response.status, responseText: '' };
         }
 
+        // Get response text for N8N confirmation
+        const responseText = await response.text();
         console.log(`Webhook ${url} success`);
-        return { success: true, url, status: response.status };
+        return { success: true, url, status: response.status, responseText, isProduction: index === 0 };
       });
 
       const results = await Promise.allSettled(webhookPromises);
-      const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+      const successResults = results.filter(r => r.status === 'fulfilled' && r.value.success);
+      const successCount = successResults.length;
       
       if (successCount > 0) {
         console.log(`${successCount}/${this.webhookUrls.length} webhooks succeeded`);
-        return { success: true, message: `Lead sent to ${successCount} webhook(s)` };
+        
+        // Get N8N response from production webhook (first one)
+        const productionResult = successResults.find(r => r.status === 'fulfilled' && r.value.isProduction);
+        const n8nResponse = productionResult?.status === 'fulfilled' ? productionResult.value.responseText : undefined;
+        
+        return { 
+          success: true, 
+          message: `Lead sent to ${successCount} webhook(s)`,
+          n8nResponse 
+        };
       } else {
         throw new Error('All webhooks failed');
       }
@@ -132,7 +157,8 @@ class LeadCaptureService {
       console.error('Error sending to webhooks:', error);
       return { 
         success: false, 
-        message: error instanceof Error ? error.message : 'Unknown webhook error' 
+        message: error instanceof Error ? error.message : 'Unknown webhook error',
+        n8nResponse: undefined
       };
     }
   }
@@ -189,7 +215,8 @@ class LeadCaptureService {
           leadCaptured: true,
           email: email || undefined,
           phone: phone || undefined,
-          response
+          response,
+          n8nResponse: webhookResult.n8nResponse
         };
       } else {
         const response = language === 'sv'

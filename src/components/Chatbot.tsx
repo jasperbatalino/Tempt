@@ -2,12 +2,15 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, User, Loader2 } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import BookingModal from './BookingModal';
+import ConfirmationModal from './ConfirmationModal';
 
 const Chatbot = () => {
   const { messages, isLoading, sendMessage } = useChat();
   const [input, setInput] = useState('');
   const [showBooking, setShowBooking] = useState(false);
   const [detectedService, setDetectedService] = useState<string>('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [leadData, setLeadData] = useState<{ email?: string; phone?: string; n8nResponse?: string }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +60,18 @@ const Chatbot = () => {
     try {
       const result = await sendMessage(messageContent);
       
+      // Check for lead capture confirmation
+      if (result?.leadCaptured) {
+        setLeadData({
+          email: result.email,
+          phone: result.phone,
+          n8nResponse: result.n8nResponse
+        });
+        setTimeout(() => {
+          setShowConfirmation(true);
+        }, 1000); // Show modal after 1 second
+      }
+      
       if (result?.hasBookingIntent && result?.serviceType) {
         setDetectedService(result.serviceType);
         setTimeout(() => {
@@ -77,6 +92,11 @@ const Chatbot = () => {
     setDetectedService('');
   }, []);
 
+  const closeConfirmation = useCallback(() => {
+    setShowConfirmation(false);
+    setLeadData({});
+  }, []);
+
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
@@ -84,7 +104,7 @@ const Chatbot = () => {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white border-2 border-gray-200">
             <img 
-              src="/public/image.png" 
+              src="/axie-logo.png" 
               alt="Axie Studio AI" 
               className="w-full h-full object-cover"
             />
@@ -115,7 +135,7 @@ const Chatbot = () => {
                 <User className="w-4 h-4 text-white" />
               ) : (
                 <img 
-                  src="/public/image.png" 
+                  src="/axie-logo.png" 
                   alt="Axie" 
                   className="w-full h-full object-cover"
                 />
@@ -204,6 +224,15 @@ const Chatbot = () => {
         isOpen={showBooking}
         onClose={closeCalendar}
         detectedService={detectedService}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        onClose={closeConfirmation}
+        email={leadData.email}
+        phone={leadData.phone}
+        n8nResponse={leadData.n8nResponse}
       />
     </div>
   );
