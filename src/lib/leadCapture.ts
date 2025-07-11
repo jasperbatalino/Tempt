@@ -64,7 +64,7 @@ class LeadCaptureService {
       'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
-      'kan du kontakta', 'kontakta mig genom'
+      'kan du kontakta', 'kontakta mig genom', 'min e-post', 'mitt mail'
     ];
 
     const englishTriggers = [
@@ -72,7 +72,9 @@ class LeadCaptureService {
       'my email', 'my phone', 'reach me', 'follow up', 'get back to me', 'through',
       'book appointment', 'consultation', 'meet', 'discuss more',
       'quote', 'pricing', 'more information', 'want to know more',
-      'can you contact', 'contact me through'
+      'can you contact', 'contact me through', 'my email is', 'email is',
+      'here is my email', 'you can reach me', 'contact me at', 'reach me at',
+      'send me', 'email me at', 'my contact', 'get back to me at'
     ];
 
     const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
@@ -224,11 +226,11 @@ class LeadCaptureService {
       if (webhookResult.success) {
         response = language === 'sv' 
           ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`
-          : `Thank you so much! We have sent a confirmation to${email ? ` ${email}` : ''}${phone ? ` and noted your phone number ${phone}` : ''}. Please check your email for more information. Would you like to know more about our services while you wait?`;
+          : `Thank you so much! We have received your information and will contact you soon! A confirmation has been sent to${email ? ` ${email}` : ''}${phone ? ` and we've noted your phone number ${phone}` : ''}. Please check your email for more information. Would you like to know more about our services while you wait?`;
       } else {
         response = language === 'sv'
           ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
-          : `Thank you so much! We have sent a confirmation to${email ? ` ${email}` : ''}${phone ? ` and noted your phone number ${phone}` : ''}. Please check your email for more information. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
+          : `Thank you so much! We have received your information and will contact you soon! A confirmation has been sent to${email ? ` ${email}` : ''}${phone ? ` and we've noted your phone number ${phone}` : ''}. Please check your email for more information. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
       }
 
       return {
