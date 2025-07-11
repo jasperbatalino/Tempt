@@ -62,7 +62,8 @@ class LeadCaptureService {
     // Swedish triggers only
     const swedishTriggers = [
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
-      'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
+      'min email', 'my email', 'save my email', 'spara min e post', 'spara min email',
+      'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
       'kan du kontakta', 'kontakta mig genom', 'min e-post', 'mitt mail'

@@ -38,17 +38,14 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     - "BOOKING_SUGGEST:app-development" för apputveckling
     - "BOOKING_SUGGEST:complete-service" för kompletta lösningar
     
-    När användaren bekräftar att de vill boka, använd då:
-    - "BOOKING_CONFIRMED:service-type" för att öppna bokningsmodalen
+    När användaren säger "boka", "ja", "absolut" eller bekräftar bokning, använd då:
+    - "BOOKING_CONFIRMED:onboarding" för att öppna bokningsmodalen direkt
     
     VIKTIGT: 
-    - Fråga alltid om användaren vill boka innan du öppna bokningsmodalen
-    - Använd ALDRIG markdown-formatering som **, *, eller andra symboler i dina svar
-    - När du använder BOOKING_CONFIRMED, inkludera INTE denna text i det synliga svaret till användaren
+    - När användaren säger "boka" - använd BOOKING_CONFIRMED:onboarding direkt
+    - Använd ALDRIG markdown-formatering 
+    - BOOKING_CONFIRMED ska INTE synas i svaret till användaren
     - Ge alltid rena, professionella svar utan formatering
-    - Exempel: "Vill du boka en kostnadsfri konsultation för [tjänst]?"
-    
-    Följ alltid med ett vänligt meddelande efter BOOKING_SUGGEST.`;
     
     // Add relevant context if needed
     if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content)) {
