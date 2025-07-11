@@ -56,20 +56,27 @@ class LeadCaptureService {
   }
 
   // Detect if user wants to be contacted
-  detectContactIntent(message: string): boolean {
+  detectContactIntent(message: string, language: 'sv' | 'en'): boolean {
     const lowerMessage = message.toLowerCase();
     
-    // ENDAST SVENSKA triggers
     const swedishTriggers = [
       'kontakta mig', 'ring mig', 'mejla mig', 'hör av er', 'få kontakt',
-      'spara min e post', 'spara min email', 'min e-post', 'mitt mail',
-      'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
+      'min email', 'mitt telefonnummer', 'nå mig', 'återkoppla', 'genom',
       'boka tid', 'konsultation', 'träffa', 'prata mer', 'diskutera',
       'offert', 'prisuppgift', 'mer information', 'vill veta mer',
-      'kan du kontakta', 'kontakta mig genom', 'skicka till mig'
+      'kan du kontakta', 'kontakta mig genom'
     ];
 
-    return swedishTriggers.some(trigger => lowerMessage.includes(trigger));
+    const englishTriggers = [
+      'contact me', 'call me', 'email me', 'reach out', 'get in touch',
+      'my email', 'my phone', 'reach me', 'follow up', 'get back to me', 'through',
+      'book appointment', 'consultation', 'meet', 'discuss more',
+      'quote', 'pricing', 'more information', 'want to know more',
+      'can you contact', 'contact me through'
+    ];
+
+    const triggers = language === 'sv' ? swedishTriggers : englishTriggers;
+    return triggers.some(trigger => lowerMessage.includes(trigger));
   }
 
   // Send lead data to N8N webhooks using GET method with URL parameters
@@ -169,7 +176,8 @@ class LeadCaptureService {
 
   // Process message and capture lead if detected
   async processMessage(
-    message: string,
+    message: string, 
+    language: 'sv' | 'en', 
     sessionId?: string
   ): Promise<{ 
     hasContactIntent: boolean; 
@@ -179,10 +187,7 @@ class LeadCaptureService {
     response?: string;
     n8nResponse?: string;
   }> {
-    console.log('🔍 Processing message for lead capture:', message);
-    
-    const hasContactIntent = this.detectContactIntent(message);
-    console.log('📧 Has contact intent:', hasContactIntent);
+    const hasContactIntent = this.detectContactIntent(message, language);
     
     if (!hasContactIntent) {
       return { hasContactIntent: false, leadCaptured: false };
@@ -190,13 +195,9 @@ class LeadCaptureService {
 
     const email = this.extractEmail(message);
     const phone = this.extractPhone(message);
-    console.log('📧 Extracted email:', email);
-    console.log('📱 Extracted phone:', phone);
 
     // Only send to webhook if we have contact information
     if (email || phone) {
-      console.log('✅ Contact info found, processing lead...');
-      
       const leadData: LeadData = {
         email: email || undefined,
         phone: phone || undefined,
@@ -208,11 +209,10 @@ class LeadCaptureService {
 
       // Try to send to webhooks, but don't fail if they're down
       const webhookResult = await this.sendToWebhooks(leadData);
-      console.log('🔗 Webhook result:', webhookResult);
       
       // Always save to database regardless of webhook status
       try {
-        await this.saveToReceiptFile(leadData, 'sv');
+        await this.saveToReceiptFile(leadData, language);
         console.log('✅ Receipt saved to file');
       } catch (fileError) {
         console.error('❌ Receipt file save failed:', fileError);
@@ -222,9 +222,13 @@ class LeadCaptureService {
       // Generate response based on webhook success
       let response: string;
       if (webhookResult.success) {
-        response = `Perfekt! 🎉 Tack så mycket! Vi har registrerat din information:${email ? `\n📧 E-post: ${email}` : ''}${phone ? `\n📱 Telefon: ${phone}` : ''}\n\nEn bekräftelse har skickats och Stefan kommer att kontakta dig inom 2 timmar för en kostnadsfri konsultation över kaffe! ☕\n\nVill du veta mer om våra tjänster medan du väntar? 🚀`;
+        response = language === 'sv' 
+          ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Vill du veta mer om våra tjänster medan du väntar?`
+          : `Thank you so much! We have sent a confirmation to${email ? ` ${email}` : ''}${phone ? ` and noted your phone number ${phone}` : ''}. Please check your email for more information. Would you like to know more about our services while you wait?`;
       } else {
-        response = `Perfekt! 🎉 Tack så mycket! Vi har registrerat din information:${email ? `\n📧 E-post: ${email}` : ''}${phone ? `\n📱 Telefon: ${phone}` : ''}\n\nStefan kommer att kontakta dig inom 2 timmar för en kostnadsfri konsultation över kaffe! ☕ Du kan också nå honom direkt på stefan@axiestudio.se eller +46 735 132 620.\n\nVill du veta mer om våra tjänster medan du väntar? 🚀`;
+        response = language === 'sv'
+          ? `Tack så mycket! Vi har skickat en bekräftelse till${email ? ` ${email}` : ''}${phone ? ` och noterat ditt telefonnummer ${phone}` : ''}. Vänligen kontrollera din e-post för mer information. Du kan också kontakta Stefan direkt på stefan@axiestudio.se eller +46 735 132 620. Vill du veta mer om våra tjänster medan du väntar?`
+          : `Thank you so much! We have sent a confirmation to${email ? ` ${email}` : ''}${phone ? ` and noted your phone number ${phone}` : ''}. Please check your email for more information. You can also contact Stefan directly at stefan@axiestudio.se or +46 735 132 620. Would you like to know more about our services while you wait?`;
       }
 
       return {
@@ -237,7 +241,9 @@ class LeadCaptureService {
       };
     } else {
       // User wants contact but didn't provide info - ask for it
-      const response = 'Fantastiskt! 🚀 Jag skulle gärna hjälpa dig få kontakt med Stefan. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation över kaffe? ☕✨';
+      const response = language === 'sv'
+        ? 'Absolut! Jag skulle gärna hjälpa dig. Kan du dela din e-postadress eller telefonnummer så kan vi kontakta dig så snart som möjligt för en kostnadsfri konsultation?'
+        : 'Absolutely! I\'d be happy to help you. Could you share your email address or phone number so we can contact you as soon as possible for a free consultation?';
       
       return {
         hasContactIntent: true,
@@ -248,10 +254,10 @@ class LeadCaptureService {
   }
 
   // Save lead to Supabase database
-  private async saveToReceiptFile(leadData: LeadData): Promise<void> {
+  private async saveToReceiptFile(leadData: LeadData, language: 'sv' | 'en'): Promise<void> {
     try {
       // Create receipt content based on language
-      const receiptContent = this.generateReceiptContent(leadData);
+      const receiptContent = this.generateReceiptContent(leadData, language);
 
       // In a real environment, this would write to a server file
       // For now, we'll log it and store in localStorage as backup
@@ -262,7 +268,7 @@ class LeadCaptureService {
       localStorage.setItem('axie-receipts', existingReceipts + receiptContent);
       
       // Also download as file for immediate access
-      this.downloadReceiptFile(receiptContent);
+      this.downloadReceiptFile(receiptContent, language);
       
     } catch (error) {
       console.error('Error saving receipt file:', error);
@@ -271,11 +277,14 @@ class LeadCaptureService {
   }
 
   // Generate receipt content based on language
-  private generateReceiptContent(leadData: LeadData): string {
+  private generateReceiptContent(leadData: LeadData, language: 'sv' | 'en'): string {
     const date = new Date(leadData.timestamp);
-    const formattedDate = date.toLocaleString('sv-SE');
+    const formattedDate = language === 'sv' 
+      ? date.toLocaleString('sv-SE')
+      : date.toLocaleString('en-US');
 
-    return `
+    if (language === 'sv') {
+      return `
 ╔══════════════════════════════════════════════════════════════╗
 ║                        AXIE STUDIO                           ║
 ║                   KONTAKTBEKRÄFTELSE                         ║
@@ -326,17 +335,70 @@ Stefan & Axie Studio Team
 ═══════════════════════════════════════════════════════════════
 
 `;
+    } else {
+      return `
+╔══════════════════════════════════════════════════════════════╗
+║                        AXIE STUDIO                           ║
+║                   CONTACT CONFIRMATION                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+📅 Date: ${formattedDate}
+
+Hello!
+
+We have received your information and will contact you soon! 
+By using our system, you agree that we process your information 
+to contact you.
+
+═══════════════════════════════════════════════════════════════
+                      CONTACT INFORMATION                      
+═══════════════════════════════════════════════════════════════
+
+📧 Email:         ${leadData.email || 'Not provided'}
+📱 Phone:         ${leadData.phone || 'Not provided'}
+💬 Message:       ${leadData.context}
+🌐 Source:        ${leadData.source}
+🆔 Session ID:    ${leadData.sessionId || 'N/A'}
+⏰ Timestamp:     ${leadData.timestamp}
+
+═══════════════════════════════════════════════════════════════
+                         NEXT STEPS                           
+═══════════════════════════════════════════════════════════════
+
+✅ Your request has been registered
+✅ We will contact you within 2 hours
+✅ Free consultation over coffee ☕
+✅ Tailored solution for your business
+
+═══════════════════════════════════════════════════════════════
+                      CONTACT US DIRECTLY                     
+═══════════════════════════════════════════════════════════════
+
+📧 Email:     stefan@axiestudio.se
+📞 Phone:     +46 735 132 620
+🌐 Website:   axiestudio.se
+📍 Location:  Jönköping, Sweden
+
+Thank you for choosing Axie Studio!
+
+Best regards,
+Stefan & Axie Studio Team
+
+═══════════════════════════════════════════════════════════════
+
+`;
+    }
   }
 
   // Download receipt as text file
-  private downloadReceiptFile(receiptContent: string): void {
+  private downloadReceiptFile(receiptContent: string, language: 'sv' | 'en'): void {
     try {
       const blob = new Blob([receiptContent], { type: 'text/plain; charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       
-      const prefix = 'axie-kvitto';
+      const prefix = language === 'sv' ? 'axie-kvitto' : 'axie-receipt';
       link.download = `${prefix}-${new Date().toISOString().split('T')[0]}-${Date.now()}.txt`;
       
       document.body.appendChild(link);

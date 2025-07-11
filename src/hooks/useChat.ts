@@ -78,10 +78,9 @@ export function useChat() {
       // Check for lead capture before generating AI response
       const leadResult = await leadCaptureService.processMessage(
         userMessage.content,
+        'sv',
         sessionId
       );
-      
-      console.log('📧 Lead capture result:', leadResult);
 
       // If lead was captured, show confirmation message
       if (leadResult.leadCaptured && leadResult.response) {
@@ -177,7 +176,6 @@ export function useChat() {
 
       // Generate response
       const response = await generateResponse(chatMessages);
-      console.log('🤖 Generated response:', response);
       
       // Remove thinking message and add real response
       setMessages(prev => prev.filter(msg => !msg.isLoading));
@@ -185,14 +183,21 @@ export function useChat() {
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: response.replace(/BOOKING_CONFIRMED:\w+\s*/g, '').trim(),
+        content: response,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
 
       // Save assistant message to database
-      await saveMessage(sessionId, 'assistant', response);
+      await saveMessage(sessionId, 'assistant', assistantMessage.content);
+
+      // Check for booking confirmation (only open modal on confirmation)
+      const bookingMatch = response.match(/BOOKING_CONFIRMED:(\w+)/);
+      if (bookingMatch) {
+        const serviceType = bookingMatch[1];
+        return { hasBookingIntent: true, serviceType, response };
+      }
 
       return { hasBookingIntent: false, response };
 

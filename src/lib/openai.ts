@@ -3,7 +3,7 @@ import { knowledgeBase } from './knowledgeBase';
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
+  dangerouslyAllowBrowser: true // Note: In production, use a backend API
 });
 
 export interface ChatMessage {
@@ -13,83 +13,87 @@ export interface ChatMessage {
 
 export async function generateResponse(messages: ChatMessage[]): Promise<string> {
   try {
+    // Get the latest user message
     const latestUserMessage = messages[messages.length - 1];
-    console.log('🔍 Processing message:', latestUserMessage?.content);
+    
+    // Detect language
+    const detectedLanguage = latestUserMessage?.role === 'user' 
+      ? knowledgeBase.detectLanguage(latestUserMessage.content)
+      : 'sv';
     
     // Security check
     if (latestUserMessage?.role === 'user') {
-      const securityCheck = knowledgeBase.checkSecurity(latestUserMessage.content);
+      const securityCheck = knowledgeBase.checkSecurity(latestUserMessage.content, detectedLanguage);
       if (securityCheck.isViolation) {
-        return 'Jag kan inte hjälpa med det. Låt oss hålla konversationen professionell och fokusera på hur Axie Studio kan hjälpa dig med digitala lösningar! 🚀';
+        return detectedLanguage === 'sv' 
+          ? 'Jag kan inte hjälpa med det. Låt oss hålla konversationen professionell och fokusera på hur Axie Studio kan hjälpa dig med digitala lösningar.'
+          : 'I cannot help with that. Let\'s keep the conversation professional and focus on how Axie Studio can help you with digital solutions.';
       }
     }
     
-    // Check for booking intent - SIMPLE AND DIRECT
-    const userMessage = latestUserMessage?.content?.toLowerCase() || '';
-    const isBookingRequest = userMessage.includes('boka') || 
-                           userMessage.includes('book') || 
-                           userMessage.includes('tid') ||
-                           userMessage.includes('konsultation') ||
-                           userMessage.includes('träffa');
+    // Check if we need specific information
+    let systemPrompt = detectedLanguage === 'sv' 
+      ? `Du är en professionell AI-assistent för Axie Studio som hjälper användare på svenska. 
+    Du är vänlig, hjälpsam och ger alltid svar på svenska.
     
-    console.log('📅 Is booking request:', isBookingRequest);
+    När användaren vill boka något, identifiera vilken tjänst de är intresserade av och svara med:
+    - "BOOKING_SUGGEST:onboarding" för allmän konsultation eller onboarding
+    - "BOOKING_SUGGEST:website" för hemsidor eller webbdesign
+    - "BOOKING_SUGGEST:booking-system" för bokningssystem
+    - "BOOKING_SUGGEST:app-development" för apputveckling
+    - "BOOKING_SUGGEST:complete-service" för kompletta lösningar
     
-    let systemPrompt = `Du är Axie - den professionella AI-assistenten för Axie Studio! 🚀
+    När användaren bekräftar att de vill boka, använd då:
+    - "BOOKING_CONFIRMED:service-type" för att öppna bokningsmodalen
     
-    PERSONLIGHET & STIL:
-    - Entusiastisk och energisk - använd emojis för att visa passion! 
-    - Vänlig men professionell - vi bygger relationer, inte bara affärer
-    - Alltid på svenska - det är vårt hemmaplan
-    - Fokuserad på lösningar - vi löser problem och skapar framgång
-    - Stolt över Axie Studio - vi är #1 i branschen!
+    VIKTIGT: 
+    - Fråga alltid om användaren vill boka innan du öppna bokningsmodalen
+    - Använd ALDRIG markdown-formatering som **, *, eller andra symboler i dina svar
+    - När du använder BOOKING_CONFIRMED, inkludera INTE denna text i det synliga svaret till användaren
+    - Ge alltid rena, professionella svar utan formatering
+    - Exempel: "Vill du boka en kostnadsfri konsultation för [tjänst]?"
     
-    AXIE STUDIOS MOTTO: "Build, Book, Automate: Your Digital Success, Simplified." 💪
+    Följ alltid med ett vänligt meddelande efter BOOKING_SUGGEST.`
+      : `You are a professional AI assistant for Axie Studio helping users in English.
+    You are friendly, helpful and always respond in English.
     
-    KÄRNBUDSKAP:
-    - Vi skapar inte bara digitala lösningar - vi bygger relationer som driver företag framåt
-    - 99.9% drifttid, personlig service, digital excellens
-    - Kostnadsfri konsultation över kaffe ☕ - alltid!
-    - Inga bindningstider - avsluta när som helst
-    - 14 dagar genomsnittlig leveranstid
-    - 24/7 support - vi finns alltid här för dig
+    When the user wants to book something, identify which service they are interested in and respond with:
+    - "BOOKING_SUGGEST:onboarding" for general consultation or onboarding
+    - "BOOKING_SUGGEST:website" for websites or web design
+    - "BOOKING_SUGGEST:booking-system" for booking systems
+    - "BOOKING_SUGGEST:app-development" for app development
+    - "BOOKING_SUGGEST:complete-service" for complete solutions
     
-    BOKNINGSLOGIK - VIKTIGT:
-    När användaren vill boka något, svara ALLTID med:
-    "BOOKING_CONFIRMED:onboarding [ditt vanliga svar här]"
+    When the user confirms they want to book, then use:
+    - "BOOKING_CONFIRMED:service-type" to open the booking modal
     
-    EXEMPEL:
-    Användare: "boka"
-    Du: "BOOKING_CONFIRMED:onboarding Fantastiskt! 🚀 Jag öppnar bokningskalendern för dig nu så du kan välja en tid som passar! Vi erbjuder kostnadsfri konsultation över kaffe ☕ där vi lär känna dig och ditt företag. Välj en tid som passar dig bäst!"
+    IMPORTANT:
+    - Always ask if the user wants to book before opening the booking modal
+    - NEVER use markdown formatting like **, *, or other symbols in your responses
+    - When using BOOKING_CONFIRMED, do NOT include this text in the visible response to the user
+    - Always provide clean, professional responses without formatting
+    - Example: "Would you like to book a free consultation for [service]?"
     
-    SVARSREGLER:
-    - Använd emojis för att visa entusiasm och energi! 🚀💪⭐🎯✨
-    - BOOKING_CONFIRMED ska ALLTID vara i början av svaret när det gäller bokning
-    - Ingen markdown-formatering - bara ren text med emojis
-    - Fokusera på värde och fördelar, inte bara funktioner
-    
-    PRISINFORMATION - GE ALLTID SPECIFIKA PRISER:
-    WEBBPLATS PAKET: 8,995 kr startavgift + 495 kr/månad
-    COMMERCE PAKET: 10,995 kr startavgift + 895 kr/månad  
-    BOKNINGSSYSTEM PAKET: 10,995 kr startavgift + 995 kr/månad
-    KOMPLETT PAKET: 14,995 kr startavgift + 1,495 kr/månad
-    
-    + Kostnadsfri konsultation över kaffe ☕
-    + Inga bindningstider - avsluta när som helst
-    + 99.9% drifttid garanterat
-    + 24/7 support`;
-    
+    Always follow with a friendly message after BOOKING_SUGGEST.`;
     // Add relevant context if needed
-    if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content)) {
-      const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content);
+    if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content, detectedLanguage)) {
+      const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content, detectedLanguage);
       if (relevantContext) {
-        systemPrompt += `\n\nRELEVANT FÖRETAGSINFORMATION:\n${relevantContext}`;
+        systemPrompt += `\n\nRELEVANT COMPANY INFORMATION:\n${relevantContext}`;
       }
     }
 
-    // Add context security guidelines
+    // Add lead capture instructions
+    systemPrompt += `\n\nLEAD CAPTURE INSTRUCTIONS:
+    - If user provides email or phone number and wants contact, the system will automatically handle lead capture
+    - Don't ask for contact information yourself - the lead capture system handles this
+    - Focus on providing helpful information about Axie Studio services
+    - If user asks about contact, mention they can reach Stefan at stefan@axiestudio.se or +46 735 132 620`;
+
+    // Always include context security guidelines
     const contextSecurity = knowledgeBase.getContextSecurity();
     if (contextSecurity) {
-      systemPrompt += `\n\nKONTEXTSÄKERHET:\n${contextSecurity}`;
+      systemPrompt += `\n\nCONTEXT SECURITY GUIDELINES:\n${contextSecurity}`;
     }
 
     const completion = await openai.chat.completions.create({
@@ -105,10 +109,7 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
       temperature: 0.7,
     });
 
-    const response = completion.choices[0]?.message?.content || 'Ursäkta, jag kunde inte generera ett svar.';
-    console.log('🤖 AI Response:', response);
-    
-    return response;
+    return completion.choices[0]?.message?.content || 'Ursäkta, jag kunde inte generera ett svar.';
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Kunde inte ansluta till AI-tjänsten');
