@@ -7,6 +7,9 @@ interface LeadData {
   source: string;
   sessionId?: string;
   timestamp: string;
+  language?: 'sv' | 'en';
+  userAgent?: string;
+  referrer?: string;
 }
 
 interface WebhookResponse {
@@ -107,7 +110,7 @@ class LeadCaptureService {
       const url = this.webhookUrls[i];
       
       try {
-        console.log(`Attempting webhook ${i + 1}/${this.webhookUrls.length}: ${url}`);
+        console.log(`📡 Webhook ${i + 1}/${this.webhookUrls.length}: ${url}`);
         
         // Build URL parameters for GET request
         const params = new URLSearchParams();
@@ -115,8 +118,14 @@ class LeadCaptureService {
         if (leadData.phone) params.append('phone', leadData.phone);
         params.append('context', leadData.context);
         params.append('source', leadData.source);
-        if (leadData.sessionId) params.append('sessionId', leadData.sessionId);
+        if (leadData.sessionId) {
+          params.append('sessionId', leadData.sessionId);
+          params.append('chatId', leadData.sessionId); // For Telegram integration
+        }
         params.append('timestamp', leadData.timestamp);
+        params.append('language', leadData.language || 'sv');
+        params.append('userAgent', navigator.userAgent);
+        params.append('referrer', document.referrer || 'direct');
         
         const fullUrl = `${url}?${params.toString()}`;
         
@@ -125,6 +134,8 @@ class LeadCaptureService {
           method: 'GET',
           headers: {
             'Accept': 'text/plain, application/json, */*',
+            'X-Axie-Source': 'chatbot',
+            'X-Axie-Version': '2.0',
           },
         });
 
@@ -225,6 +236,9 @@ class LeadCaptureService {
         source: 'chat',
         sessionId,
         timestamp: new Date().toISOString()
+        language,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || 'direct'
       };
 
       // Try to send to webhooks, but don't fail if they're down
@@ -327,7 +341,10 @@ information för att kontakta dig.
 💬 Meddelande:    ${leadData.context}
 🌐 Källa:         ${leadData.source}
 🆔 Session ID:    ${leadData.sessionId || 'N/A'}
+🗣️ Språk:         ${leadData.language || 'sv'}
 ⏰ Tidsstämpel:   ${leadData.timestamp}
+🌐 Webbläsare:    ${leadData.userAgent || 'N/A'}
+🔗 Referrer:      ${leadData.referrer || 'Direkt besök'}
 
 ═══════════════════════════════════════════════════════════════
                          NÄSTA STEG                           
@@ -379,7 +396,10 @@ to contact you.
 💬 Message:       ${leadData.context}
 🌐 Source:        ${leadData.source}
 🆔 Session ID:    ${leadData.sessionId || 'N/A'}
+🗣️ Language:      ${leadData.language || 'en'}
 ⏰ Timestamp:     ${leadData.timestamp}
+🌐 Browser:       ${leadData.userAgent || 'N/A'}
+🔗 Referrer:      ${leadData.referrer || 'Direct visit'}
 
 ═══════════════════════════════════════════════════════════════
                          NEXT STEPS                           
