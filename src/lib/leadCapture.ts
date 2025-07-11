@@ -235,7 +235,7 @@ class LeadCaptureService {
         context: message,
         source: 'chat',
         sessionId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
         language,
         userAgent: navigator.userAgent,
         referrer: document.referrer || 'direct'
