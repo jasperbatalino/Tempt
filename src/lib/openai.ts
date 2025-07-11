@@ -205,12 +205,12 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     if (latestUserMessage?.role === 'user' && knowledgeBase.needsSpecificInformation(latestUserMessage.content, detectedLanguage)) {
       const relevantContext = knowledgeBase.getRelevantContext(latestUserMessage.content, detectedLanguage);
       if (relevantContext) {
-        systemPrompt += `\n\nRELEVANT COMPANY INFORMATION:\n${relevantContext}`;
+        systemPrompt += \`\n\nRELEVANT COMPANY INFORMATION:\n${relevantContext}`;
       }
     }
 
     // Add lead capture instructions
-    systemPrompt += `\n\nLEAD CAPTURE INSTRUCTIONS:
+    systemPrompt += \`\n\nLEAD CAPTURE INSTRUCTIONS:
     - If user provides email or phone number and wants contact, the system will automatically handle lead capture
     - Don't ask for contact information yourself - the lead capture system handles this
     - Focus on providing helpful information about Axie Studio services
@@ -219,7 +219,7 @@ export async function generateResponse(messages: ChatMessage[]): Promise<string>
     // Always include context security guidelines
     const contextSecurity = knowledgeBase.getContextSecurity();
     if (contextSecurity) {
-      systemPrompt += `\n\nCONTEXT SECURITY GUIDELINES:\n${contextSecurity}`;
+      systemPrompt += \`\n\nCONTEXT SECURITY GUIDELINES:\n${contextSecurity}`;
     }
 
     const completion = await openai.chat.completions.create({
